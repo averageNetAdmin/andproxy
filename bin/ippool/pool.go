@@ -1,58 +1,51 @@
 package ippool
 
 import (
+	"errors"
 	"net/netip"
 	"strings"
 )
 
 //
-//	Find - return the server that should handle request
+//	the struct that keep clients addresses
+//	caontain IP addresses "192.168.0.1"
+// 	and IP networks "192.168.0.0/24"
 //
-type BalancingMethod interface {
-	Find(ip string, p *ServerPool) (string, error)
-}
-
-//
-//	the struct that keep servers addresses
-//	contain only IP addresses
-//
-type ServerPool struct {
+type Pool struct {
 	addr []netip.Addr
+	nets []netip.Prefix
 }
 
 //
-//	check that server should handle request
+//	display all IP addresses and networks
 //
-func (p *ServerPool) WhatServer(ip string, bm BalancingMethod) (string, error) {
-	add, err := bm.Find(ip, p)
-	if err != nil {
-		return "", err
-	}
-	return add, nil
-}
-
-//
-//	display all servers IP
-//
-func (p *ServerPool) String() string {
-	result := ""
-	for _, addr := range p.addr {
+func (ar *Pool) String() string {
+	result := "["
+	for _, addr := range ar.addr {
 		result += addr.String() + " "
 	}
-	return result
+	for _, s := range ar.nets {
+		result += s.String() + " "
+	}
+	return result + "]"
 }
 
 //
-//	check the server IP in pool or not
-//	return true if pool contain IP
+//	check the IP addresse in pool or not
+//	return true if pool contain IP or pool contain networm what contain ip
 //
-func (p *ServerPool) Contains(searchIP string) (bool, error) {
-	ip, err := netip.ParseAddr(searchIP)
+func (p *Pool) Conatains(searchIP string) (bool, error) {
+	sIP, err := netip.ParseAddr(searchIP)
 	if err != nil {
 		return false, err
 	}
-	for _, addr := range p.addr {
-		if addr.Compare(ip) == 0 {
+	for _, a := range p.addr {
+		if a.Compare(sIP) == 0 {
+			return true, nil
+		}
+	}
+	for _, n := range p.nets {
+		if n.Contains(sIP) {
 			return true, nil
 		}
 	}
@@ -60,18 +53,27 @@ func (p *ServerPool) Contains(searchIP string) (bool, error) {
 }
 
 //
-//	add IP address in servers pool
+//	add IP or IP range or network to the pool
 //
-func (p *ServerPool) Add(a string) error {
-	isRange := strings.Contains(a, "-")
-	if isRange {
-		rng, err := genIPRange(a)
+func (p *Pool) Add(ip string) error {
+	isRange := strings.Contains(ip, "-")
+	isNet := strings.Contains(ip, "/")
+	if isRange && isNet {
+		return errors.New("Invalid address" + ip + "\n Address cannot contain Net and Range at the same time")
+	} else if isRange {
+		rng, err := genIPRange(ip)
 		if err != nil {
 			return err
 		}
 		p.addr = append(p.addr, rng...)
+	} else if isNet {
+		net, err := netip.ParsePrefix(ip)
+		if err != nil {
+			return err
+		}
+		p.nets = append(p.nets, net)
 	} else {
-		addr, err := netip.ParseAddr(a)
+		addr, err := netip.ParseAddr(ip)
 		if err != nil {
 			return err
 		}
@@ -81,11 +83,11 @@ func (p *ServerPool) Add(a string) error {
 }
 
 //
-//	add IP address in servers pool from array
+//	add IP or IP range or network to the pool from range of strings
 //
-func (p *ServerPool) AddArr(arr []string) error {
+func (ar *Pool) AddArr(arr []string) error {
 	for _, elem := range arr {
-		err := p.Add(elem)
+		err := ar.Add(elem)
 		if err != nil {
 			return err
 		}
@@ -94,10 +96,10 @@ func (p *ServerPool) AddArr(arr []string) error {
 }
 
 //
-//	create and return new ServerPool
+//	create and return new Pool
 //
-func NewServerPool(ip ...string) (*ServerPool, error) {
-	p := new(ServerPool)
+func NewPool(ip ...string) (*Pool, error) {
+	p := new(Pool)
 	err := p.AddArr(ip)
 	if err != nil {
 		return nil, err
