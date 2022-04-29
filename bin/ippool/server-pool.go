@@ -65,7 +65,7 @@ func (p *ServerPool) Contains(searchIP string) (bool, error) {
 func (p *ServerPool) Add(a string) error {
 	isRange := strings.Contains(a, "-")
 	if isRange {
-		rng, err := genIPRange(a)
+		rng, err := CreateIPRange(a)
 		if err != nil {
 			return err
 		}
