@@ -15,7 +15,7 @@ import (
 //
 //	the struct that keep info about "microprogramm" that listen the port
 //
-type portHandler struct {
+type PortHandler struct {
 	port            string
 	protocol        string
 	accept          *ippool.Pool
@@ -29,7 +29,7 @@ type portHandler struct {
 //
 //	the struct that keep info about "microprogramm" that listen the port
 //
-func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface{}) (*portHandler, error) {
+func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface{}) (*PortHandler, error) {
 
 	var (
 		accept          *ippool.Pool
@@ -143,7 +143,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 	// TODO: add balancing methods
 	//
 
-	h := &portHandler{
+	h := &PortHandler{
 		port:            port,
 		protocol:        protocol,
 		accept:          accept,
@@ -160,7 +160,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 //
 //	start listenting the port
 //
-func (h *portHandler) Handle() error {
+func (h *PortHandler) Handle() error {
 	fmt.Println(h.protocol)
 	server, err := net.Listen(h.protocol, "0.0.0.0:"+h.port)
 	if err != nil {
