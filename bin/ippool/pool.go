@@ -61,7 +61,7 @@ func (p *Pool) Add(ip string) error {
 	if isRange && isNet {
 		return errors.New("Invalid address" + ip + "\n Address cannot contain Net and Range at the same time")
 	} else if isRange {
-		rng, err := genIPRange(ip)
+		rng, err := CreateIPRange(ip)
 		if err != nil {
 			return err
 		}
