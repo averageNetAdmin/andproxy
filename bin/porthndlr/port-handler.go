@@ -192,12 +192,12 @@ func (h *PortHandler) Handle() error {
 
 		if v != nil {
 			fmt.Println(h.toport)
-			localConn, err = net.Dial(h.protocol, *h.servers.Servers[0]+":"+h.toport)
+			localConn, err = net.Dial(h.protocol, *h.servers.Servers[0].Strings()+":"+h.toport)
 			if err != nil {
 				return err
 			}
 		} else {
-			localConn, err = net.Dial(h.protocol, h.servers.Servers[0]+":"+h.toport)
+			localConn, err = net.Dial(h.protocol, h.servers.Servers[0].Strings()+":"+h.toport)
 			if err != nil {
 				return err
 			}
