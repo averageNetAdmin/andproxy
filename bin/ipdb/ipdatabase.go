@@ -8,12 +8,18 @@ import (
 	"github.com/averageNetAdmin/andproxy/bin/srcfltr"
 )
 
+//
+//	struct what contain all pools and filters in programm
+//
 type IPDB struct {
 	pools       map[string]*ippool.Pool
 	serverPools map[string]*ippool.ServerPool
 	filters     map[string]*srcfltr.Filter
 }
 
+//
+//	add pool to db
+//
 func (db *IPDB) AddPool(name string, addresses []interface{}) error {
 	addrs := make([]string, 0)
 	for _, a := range addresses {
@@ -30,6 +36,9 @@ func (db *IPDB) AddPool(name string, addresses []interface{}) error {
 	return nil
 }
 
+//
+//	add servers pool to db
+//
 func (db *IPDB) AddServerPool(name string, addresses []interface{}) error {
 	addrs := make([]string, 0)
 	for _, a := range addresses {
@@ -46,6 +55,9 @@ func (db *IPDB) AddServerPool(name string, addresses []interface{}) error {
 	return nil
 }
 
+//
+//	add filter to db
+//
 func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
 	result := new(srcfltr.Filter)
 	for pool, srvPool := range elements {
@@ -89,14 +101,23 @@ func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
 	return nil
 }
 
+//
+//	...
+//
 func (db *IPDB) GetPool(name string) *ippool.Pool {
 	return db.pools[name]
 }
 
+//
+//	...
+//
 func (db *IPDB) GetServerPool(name string) *ippool.ServerPool {
 	return db.serverPools[name]
 }
 
+//
+//	...
+//
 func (db *IPDB) GetFilter(name string) *srcfltr.Filter {
 	return db.filters[name]
 }
