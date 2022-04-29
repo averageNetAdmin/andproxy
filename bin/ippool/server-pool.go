@@ -17,7 +17,7 @@ type BalancingMethod interface {
 //	contain only IP addresses
 //
 type ServerPool struct {
-	addr []netip.Addr
+	Servers []netip.Addr
 }
 
 //
@@ -36,7 +36,7 @@ func (p *ServerPool) WhatServer(ip string, bm BalancingMethod) (string, error) {
 //
 func (p *ServerPool) String() string {
 	result := ""
-	for _, addr := range p.addr {
+	for _, addr := range p.Servers {
 		result += addr.String() + " "
 	}
 	return result
@@ -51,7 +51,7 @@ func (p *ServerPool) Contains(searchIP string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	for _, addr := range p.addr {
+	for _, addr := range p.Servers {
 		if addr.Compare(ip) == 0 {
 			return true, nil
 		}
@@ -69,13 +69,13 @@ func (p *ServerPool) Add(a string) error {
 		if err != nil {
 			return err
 		}
-		p.addr = append(p.addr, rng...)
+		p.Servers = append(p.Servers, rng...)
 	} else {
 		addr, err := netip.ParseAddr(a)
 		if err != nil {
 			return err
 		}
-		p.addr = append(p.addr, addr)
+		p.Servers = append(p.Servers, addr)
 	}
 	return nil
 }
