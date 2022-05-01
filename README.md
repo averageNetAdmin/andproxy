@@ -1,6 +1,6 @@
 # andproxy
 
-It's universal, not only http reverse-proxy. You can listen any port and handle all requests. 
+It's universal, not only http reverse proxy. You can listen any port and handle all requests. 
 
 Configuratin setting in yaml file.
 
@@ -37,3 +37,4 @@ addressPools:
 
 It is not the end. It is only begin. If this project will be used i will develop and improve it.
 It is very early test realise.
+Anyone can download and try to use this(in /build will be builded application). I will be thankfull and happy. Please feedback
