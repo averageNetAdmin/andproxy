@@ -1,6 +1,6 @@
 # andproxy
 
-It's universal, not only http proxy. You can listen any port and handle all requests. 
+It's universal, not only http reverse-proxy. You can listen any port and handle all requests. 
 
 Configuratin setting in yaml file.
 
