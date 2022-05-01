@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/averageNetAdmin/andproxy/bin/cnfrd"
+	"github.com/averageNetAdmin/andproxy/source/cnfrd"
 )
 
 func main() {

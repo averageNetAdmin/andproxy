@@ -1,7 +1,7 @@
 package srcfltr
 
 import (
-	"github.com/averageNetAdmin/andproxy/bin/ippool"
+	"github.com/averageNetAdmin/andproxy/source/ippool"
 )
 
 //

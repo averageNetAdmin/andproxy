@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy/bin/ippool"
-	"github.com/averageNetAdmin/andproxy/bin/srcfltr"
+	"github.com/averageNetAdmin/andproxy/source/ippool"
+	"github.com/averageNetAdmin/andproxy/source/srcfltr"
 )
 
 //
@@ -20,7 +20,7 @@ type IPDB struct {
 //
 //	return new ip database
 //
-func NewIPDB() (*IPDB) {
+func NewIPDB() *IPDB {
 	db := new(IPDB)
 	db.Init()
 	return db

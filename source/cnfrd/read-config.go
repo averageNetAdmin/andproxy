@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy/bin/ipdb"
-	"github.com/averageNetAdmin/andproxy/bin/porthndlr"
+	"github.com/averageNetAdmin/andproxy/source/ipdb"
+	"github.com/averageNetAdmin/andproxy/source/porthndlr"
 	"github.com/spf13/viper"
 )
 
