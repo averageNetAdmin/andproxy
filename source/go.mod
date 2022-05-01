@@ -3,7 +3,7 @@ module andproxy
 go 1.18
 
 require (
-	github.com/averageNetAdmin/andproxy v0.0.24
+	github.com/averageNetAdmin/andproxy v0.1.2-alpha
 	github.com/spf13/viper v1.11.0
 )
 
