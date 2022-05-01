@@ -90,7 +90,7 @@ func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
 		var resServerPool *ippool.ServerPool
 		isVar := strings.HasPrefix(pool, "$")
 		if isVar {
-			p := db.pools[pool]
+			p := db.pools[pool[1:]]
 			if p == nil {
 				return errors.New("Pool" + pool + " is not exist")
 			}
@@ -104,7 +104,7 @@ func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
 		}
 		isVar = strings.HasPrefix(sPool, "$")
 		if isVar {
-			p := db.serverPools[sPool]
+			p := db.serverPools[sPool[1:]]
 			if p == nil {
 				return errors.New("Pool" + sPool + " is not exist")
 			}
