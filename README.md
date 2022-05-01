@@ -5,6 +5,7 @@ It's universal, not only http reverse-proxy. You can listen any port and handle 
 Configuratin setting in yaml file.
 
 ```yml
+#/etc/andproxy/config.yml
 listenPorts:
   tcp4 80:
     accept: 
