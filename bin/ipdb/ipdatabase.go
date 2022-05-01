@@ -18,9 +18,30 @@ type IPDB struct {
 }
 
 //
+//	return new ip database
+//
+func NewIPDB() (*IPDB) {
+	db := new(IPDB)
+	db.Init()
+	return db
+}
+
+//
+//	init db maps
+//
+func (db *IPDB) Init() {
+	db.pools = make(map[string]*ippool.Pool)
+	db.serverPools = make(map[string]*ippool.ServerPool)
+	db.filters = make(map[string]*srcfltr.Filter)
+}
+
+//
 //	add pool to db
 //
 func (db *IPDB) AddPool(name string, addresses []interface{}) error {
+	db.pools = make(map[string]*ippool.Pool)
+	db.serverPools = make(map[string]*ippool.ServerPool)
+	db.filters = make(map[string]*srcfltr.Filter)
 	addrs := make([]string, 0)
 	for _, a := range addresses {
 		if a == nil {
