@@ -1,6 +1,7 @@
 package porthndlr
 
 import (
+	"andproxy/balancing"
 	"errors"
 	"fmt"
 	"net"
@@ -18,12 +19,12 @@ import (
 type PortHandler struct {
 	port            string
 	protocol        string
-	accept          *ippool.Pool
-	deny            *ippool.Pool
-	servers         *ippool.ServerPool
-	filter          *srcfltr.Filter
+	accept          ippool.Pool
+	deny            ippool.Pool
+	servers         ippool.ServerPool
+	filter          srcfltr.Filter
 	toport          string
-	balancingMethod string
+	balancingMethod balancing.Method
 }
 
 //
@@ -39,7 +40,6 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 		toport          string
 		balancingMethod string
 	)
-
 	if valf, ok := hconf["accept"]; ok && valf != nil {
 		val := valf.(string)
 		fmt.Println(val)
@@ -118,7 +118,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 			if err != nil {
 				return nil, err
 			}
-			p.Add(ipp, srvp)
+			p.Add(*ipp, *srvp)
 			filter = p
 		}
 	} else {
@@ -138,7 +138,18 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 		toport = port
 	}
 
-	balancingMethod = "none"
+	if valf, ok := hconf["toport"]; ok && valf != nil {
+		val, ok := valf.(int)
+		if !ok {
+			return nil, errors.New("Invalid port number " + valf.(string))
+		}
+		if val < 0 || val > 65535 {
+			return nil, errors.New("Invalid port number " + strconv.Itoa(val))
+		}
+		toport = strconv.Itoa(val)
+	} else {
+		toport = port
+	}
 	//
 	// TODO: add balancing methods
 	//
@@ -146,10 +157,10 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 	h := &PortHandler{
 		port:            port,
 		protocol:        protocol,
-		accept:          accept,
-		deny:            deny,
-		servers:         servers,
-		filter:          filter,
+		accept:          *accept,
+		deny:            *deny,
+		servers:         *servers,
+		filter:          *filter,
 		toport:          toport,
 		balancingMethod: balancingMethod,
 	}
@@ -168,13 +179,11 @@ func (h *PortHandler) Handle() error {
 	}
 	for {
 		conn, err := server.Accept()
-		fmt.Println("conn")
 		if err != nil {
 			return err
 		}
 
 		sourceAddress, _, err := net.SplitHostPort(conn.RemoteAddr().String())
-		fmt.Println(sourceAddress)
 		if err != nil {
 			return err
 		}
@@ -191,7 +200,6 @@ func (h *PortHandler) Handle() error {
 		}
 
 		if v != nil {
-			fmt.Println(h.toport)
 			ipa := h.servers.Servers[0].String()
 			localConn, err = net.Dial(h.protocol, ipa+":"+h.toport)
 			if err != nil {
