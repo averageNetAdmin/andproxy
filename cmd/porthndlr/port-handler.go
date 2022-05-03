@@ -1,7 +1,6 @@
 package porthndlr
 
 import (
-	"andproxy/balancing"
 	"errors"
 	"fmt"
 	"net"

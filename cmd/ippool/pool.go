@@ -1,7 +1,7 @@
 package ippool
 
 import (
-	"errors"
+	"fmt"
 	"net/netip"
 	"strings"
 )
@@ -59,7 +59,7 @@ func (p *Pool) Add(ip string) error {
 	isRange := strings.Contains(ip, "-")
 	isNet := strings.Contains(ip, "/")
 	if isRange && isNet {
-		return errors.New("Invalid address" + ip + "\n Address cannot contain Net and Range at the same time")
+		return fmt.Errorf("invalid address %s\n Address cannot contain Net and Range at the same time", ip)
 	} else if isRange {
 		rng, err := CreateIPRange(ip)
 		if err != nil {
