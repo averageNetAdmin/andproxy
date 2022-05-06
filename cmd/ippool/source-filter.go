@@ -1,7 +1,7 @@
 package ippool
 
 //
-//	the struct that contains array of filgerElements
+//	the struct that Contains array of filgerElements
 //
 type Filter struct {
 	filters []filterElement
@@ -19,11 +19,21 @@ type filterElement struct {
 //	chcek IP pool contain IP address or not
 //
 func (elem *filterElement) Contains(ip string) (bool, error) {
-	yes, err := elem.pool.Conatains(ip)
+	yes, err := elem.pool.Contains(ip)
 	if err != nil {
 		return false, err
 	}
 	return yes, nil
+}
+
+func (f *Filter) SetLogFile(logDir string) error {
+	for i := 0; i < len(f.filters); i++ {
+		err := f.filters[i].srvpool.SetLogFile(logDir)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 //

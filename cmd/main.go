@@ -2,20 +2,20 @@ package main
 
 import (
 	"log"
-	"time"
+	"sync"
 
-	"github.com/averageNetAdmin/andproxy/source/cnfrd"
+	"github.com/averageNetAdmin/andproxy/cmd/cnfrd"
 )
 
 func main() {
-	handlers, err := cnfrd.ReadConfig()
+	var wg sync.WaitGroup
+	handlers, err := cnfrd.ReadConfig("/etc/andproxy/config.yml")
 	if err != nil {
 		log.Fatal(err)
 	}
+	wg.Add(len(handlers))
 	for _, handler := range handlers {
-		go handler.Handle()
+		handler.Handle()
 	}
-	for {
-		time.Sleep(60 * time.Second)
-	}
+	wg.Wait()
 }

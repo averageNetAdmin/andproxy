@@ -2,11 +2,11 @@ package cnfrd
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy/source/ipdb"
-	"github.com/averageNetAdmin/andproxy/source/porthndlr"
+	"github.com/averageNetAdmin/andproxy/cmd/ipdb"
+	"github.com/averageNetAdmin/andproxy/cmd/porthndlr"
 	"github.com/spf13/viper"
 )
 
@@ -18,53 +18,70 @@ func ReadConfig(CONFIGFILEPATH string) ([]*porthndlr.PortHandler, error) {
 	if err != nil {
 		return nil, err
 	}
-	db := new(ipdb.IPDB)
-	if viper.IsSet("addressPools") {
-		a, ok := (viper.Get("addressPools")).(map[string]interface{})
+	var logDir string
+	if viper.IsSet("global.logDir") {
+		a, ok := (viper.Get("global.logDir")).(string)
 		if !ok {
-			return nil, errors.New("error during reading address pools")
+			return nil, errors.New("invalid log directory")
+		}
+		logDir = a
+	} else {
+		logDir = "/var/log"
+	}
+
+	db := ipdb.NewIPDB()
+	if viper.IsSet("pools") {
+		a, ok := (viper.Get("pools")).(map[string]interface{})
+		if !ok {
+			return nil, errors.New("error during reading address pools stage 1")
 		}
 		for name, p := range a {
 			pool, ok := p.([]interface{})
 			if !ok {
-				return nil, errors.New("error during reading address pools")
+				return nil, errors.New("error during reading address pools stage 2")
 			}
-			db.AddPool(name, pool)
+			err := db.AddPool(name, pool)
+			if err != nil {
+				return nil, err
+			}
 		}
 
 	}
 
-	if viper.IsSet("servers") {
-		a, ok := (viper.Get("servers")).(map[string]interface{})
+	if viper.IsSet("serversPools") {
+		a, ok := (viper.Get("serversPools")).(map[string]interface{})
+		log.Println(a)
 		if !ok {
 			return nil, errors.New("error during reading servers pools")
 		}
 		for name, p := range a {
-			pool, ok := p.([]interface{})
+			pool, ok := p.(map[string]interface{})
 			if !ok {
 				return nil, errors.New("error during reading servers pools")
 			}
-			db.AddServerPool(name, pool)
+			err := db.AddServerPool(name, pool)
+			if err != nil {
+				return nil, err
+			}
 		}
-		fmt.Println(db)
 
 	}
 
-	if viper.IsSet("staticFilters") {
-		a, ok := (viper.Get("staticFilters")).(map[string]interface{})
-		fmt.Println(a)
+	if viper.IsSet("filters") {
+		a, ok := (viper.Get("filters")).(map[string]interface{})
 		if !ok {
 			return nil, errors.New("error during reading filters")
 		}
 		for name, p := range a {
 			pool, ok := p.(map[string]interface{})
-			fmt.Println(name, pool)
 			if !ok {
 				return nil, errors.New("error during reading filters")
 			}
-			db.AddFilter(name, pool)
+			err := db.AddFilter(name, pool)
+			if err != nil {
+				return nil, err
+			}
 		}
-		fmt.Println(db)
 	}
 	hndlrs := make([]*porthndlr.PortHandler, 0)
 	if viper.IsSet("listenPorts") {
@@ -81,7 +98,7 @@ func ReadConfig(CONFIGFILEPATH string) ([]*porthndlr.PortHandler, error) {
 			if !ok {
 				return nil, errors.New("error during reading listenning ports")
 			}
-			hndlr, err := porthndlr.NewPortHandler(nameparts[0], nameparts[1], db, conf)
+			hndlr, err := porthndlr.NewPortHandler(nameparts[0], nameparts[1], db, conf, logDir+"/andproxy")
 			if err != nil {
 				return nil, err
 			}

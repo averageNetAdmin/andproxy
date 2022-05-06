@@ -1,11 +1,10 @@
 package ipdb
 
 import (
-	"errors"
+	"fmt"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy/source/ippool"
-	"github.com/averageNetAdmin/andproxy/source/srcfltr"
+	"github.com/averageNetAdmin/andproxy/cmd/ippool"
 )
 
 //
@@ -14,7 +13,7 @@ import (
 type IPDB struct {
 	pools       map[string]*ippool.Pool
 	serverPools map[string]*ippool.ServerPool
-	filters     map[string]*srcfltr.Filter
+	filters     map[string]*ippool.Filter
 }
 
 //
@@ -32,16 +31,19 @@ func NewIPDB() *IPDB {
 func (db *IPDB) Init() {
 	db.pools = make(map[string]*ippool.Pool)
 	db.serverPools = make(map[string]*ippool.ServerPool)
-	db.filters = make(map[string]*srcfltr.Filter)
+	db.filters = make(map[string]*ippool.Filter)
+}
+
+func (db *IPDB) Print() {
+	fmt.Println(db.pools)
+	fmt.Println(db.serverPools)
+	fmt.Println(db.filters)
 }
 
 //
 //	add pool to db
 //
 func (db *IPDB) AddPool(name string, addresses []interface{}) error {
-	db.pools = make(map[string]*ippool.Pool)
-	db.serverPools = make(map[string]*ippool.ServerPool)
-	db.filters = make(map[string]*srcfltr.Filter)
 	addrs := make([]string, 0)
 	for _, a := range addresses {
 		if a == nil {
@@ -60,15 +62,8 @@ func (db *IPDB) AddPool(name string, addresses []interface{}) error {
 //
 //	add servers pool to db
 //
-func (db *IPDB) AddServerPool(name string, addresses []interface{}) error {
-	addrs := make([]string, 0)
-	for _, a := range addresses {
-		if a == nil {
-			break
-		}
-		addrs = append(addrs, a.(string))
-	}
-	p, err := ippool.NewServerPool(addrs...)
+func (db *IPDB) AddServerPool(name string, addresses map[string]interface{}) error {
+	p, err := ippool.NewServerPool(addresses)
 	if err != nil {
 		return err
 	}
@@ -80,19 +75,19 @@ func (db *IPDB) AddServerPool(name string, addresses []interface{}) error {
 //	add filter to db
 //
 func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
-	result := new(srcfltr.Filter)
+	result := new(ippool.Filter)
 	for pool, srvPool := range elements {
 		if srvPool == nil {
 			continue
 		}
-		sPool := srvPool.(string)
+
 		var resPool *ippool.Pool
 		var resServerPool *ippool.ServerPool
 		isVar := strings.HasPrefix(pool, "$")
 		if isVar {
 			p := db.pools[pool[1:]]
 			if p == nil {
-				return errors.New("Pool" + pool + " is not exist")
+				return fmt.Errorf("error: pool %v is not exist in filter %s", pool, name)
 			}
 			resPool = p
 		} else {
@@ -102,19 +97,21 @@ func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
 			}
 			resPool = p
 		}
-		isVar = strings.HasPrefix(sPool, "$")
-		if isVar {
+
+		if sPool, ok := srvPool.(string); ok && strings.HasPrefix(sPool, "$") {
 			p := db.serverPools[sPool[1:]]
 			if p == nil {
-				return errors.New("Pool" + sPool + " is not exist")
+				return fmt.Errorf("error: server pool name %v is not exist in filter %s", sPool, name)
 			}
 			resServerPool = p
-		} else {
+		} else if sPool, ok := srvPool.(map[string]interface{}); ok {
 			p, err := ippool.NewServerPool(sPool)
 			if err != nil {
 				return err
 			}
 			resServerPool = p
+		} else {
+			return fmt.Errorf("error: invalid server pool %v in filter %s", srvPool, name)
 		}
 		result.Add(resPool, resServerPool)
 	}
@@ -139,6 +136,39 @@ func (db *IPDB) GetServerPool(name string) *ippool.ServerPool {
 //
 //	...
 //
-func (db *IPDB) GetFilter(name string) *srcfltr.Filter {
+func (db *IPDB) GetFilter(name string) *ippool.Filter {
 	return db.filters[name]
+}
+
+//
+//	...
+//
+func (db *IPDB) GetPoolCopy(name string) (ippool.Pool, bool) {
+	res, ok := db.pools[name]
+	if !ok {
+		return ippool.Pool{}, false
+	}
+	return *res, true
+}
+
+//
+//	...
+//
+func (db *IPDB) GetServerPoolCopy(name string) (ippool.ServerPool, bool) {
+	res, ok := db.serverPools[name]
+	if !ok {
+		return ippool.ServerPool{}, false
+	}
+	return *res, true
+}
+
+//
+//	...
+//
+func (db *IPDB) GetFilterCopy(name string) (ippool.Filter, bool) {
+	res, ok := db.filters[name]
+	if !ok {
+		return ippool.Filter{}, false
+	}
+	return *res, true
 }

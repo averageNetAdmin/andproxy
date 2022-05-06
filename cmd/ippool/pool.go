@@ -34,7 +34,7 @@ func (ar *Pool) String() string {
 //	check the IP addresse in pool or not
 //	return true if pool contain IP or pool contain networm what contain ip
 //
-func (p *Pool) Conatains(searchIP string) (bool, error) {
+func (p *Pool) Contains(searchIP string) (bool, error) {
 	sIP, err := netip.ParseAddr(searchIP)
 	if err != nil {
 		return false, err
@@ -59,7 +59,7 @@ func (p *Pool) Add(ip string) error {
 	isRange := strings.Contains(ip, "-")
 	isNet := strings.Contains(ip, "/")
 	if isRange && isNet {
-		return fmt.Errorf("invalid address %s\n Address cannot contain Net and Range at the same time", ip)
+		return fmt.Errorf("invalid address %v\n Address cannot contain Net and Range at the same time", ip)
 	} else if isRange {
 		rng, err := CreateIPRange(ip)
 		if err != nil {
@@ -105,4 +105,11 @@ func NewPool(ip ...string) (*Pool, error) {
 		return nil, err
 	}
 	return p, nil
+}
+
+func (p *Pool) Empty() bool {
+	if len(p.addr) == 0 && len(p.nets) == 0 {
+		return true
+	}
+	return false
 }

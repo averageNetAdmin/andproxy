@@ -1,20 +1,35 @@
 package balancing
 
 import (
-	"net"
-
-	"github.com/averageNetAdmin/andproxy/source/ippool"
+	"github.com/averageNetAdmin/andproxy/cmd/ippool"
 )
 
 type Method interface {
-	Find(ip string, p *ippool.ServerPool) (string, error)
+	FindServer(ip string, p *ippool.ServerPool) (*ippool.Server, error)
+	FindAnotherServer(ip string, p *ippool.ServerPool) (*ippool.Server, error)
+}
+
+func NewMethod(name string) (Method, error) {
+	switch name {
+	case "roundRobin":
+		return &RoundRobin{counter: 0}, nil
+	default:
+		return nil, nil
+	}
 }
 
 type RoundRobin struct {
 	counter int
 }
 
-func (m RoundRobin) Find(sIP string, p *ippool.ServerPool, proto, port string) (net.Conn, error) {
-	for i := len(p.Servers);
-	net.Dial(proto, ip + ":"+port)
+func (m *RoundRobin) FindServer(sIP string, p *ippool.ServerPool) (*ippool.Server, error) {
+	srv := &p.Servers[m.counter%len(p.Servers)]
+	m.counter++
+	return srv, nil
+}
+
+func (m *RoundRobin) FindAnotherServer(sIP string, p *ippool.ServerPool) (*ippool.Server, error) {
+	srv := &p.Servers[m.counter%len(p.Servers)]
+	m.counter++
+	return srv, nil
 }
