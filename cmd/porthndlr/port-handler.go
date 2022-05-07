@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy/cmd/ipdb"
-	"github.com/averageNetAdmin/andproxy/cmd/ippool"
+	"github.com/averageNetAdmin/andproxy//cmd/ipdb"
+	"github.com/averageNetAdmin/andproxy//cmd/ippool"
 )
 
 //

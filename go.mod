@@ -1,4 +1,4 @@
-module github.com/averageNetAdmin/andproxy/cmd/andproxyd
+module github.com/averageNetAdmin/andproxy
 
 go 1.18
 
