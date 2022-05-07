@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy/cmd/balancing"
-
 	"github.com/averageNetAdmin/andproxy/cmd/ipdb"
 	"github.com/averageNetAdmin/andproxy/cmd/ippool"
 )
@@ -17,44 +15,38 @@ import (
 //
 //	the struct that keep info about "microprogramm" that listen the port
 //
-type PortHandler struct {
-	port             string
-	protocol         string
+type Handler struct {
+	port     string
+	protocol string
+	config   *Config
+	logger   *log.Logger
+}
+
+type Config struct {
 	accept           ippool.Pool
 	deny             ippool.Pool
 	servers          ippool.ServerPool
 	filter           ippool.Filter
 	toport           string
-	balancingMethod  balancing.Method
 	ServersWeight    int
 	ServersMaxFails  int
 	ServersBreakTime int
-	logger           *log.Logger
 }
 
-//
-//	the struct that keep info about "microprogramm" that listen the port
-//
-func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface{}, logDir string) (*PortHandler, error) {
-
+func NewConfig(hconf map[string]interface{}, db *ipdb.IPDB, port, handlerLogDir string) (*Config, error) {
 	var (
-		accept          ippool.Pool
-		deny            ippool.Pool
-		servers         ippool.ServerPool
-		filter          ippool.Filter
-		toport          string
-		balancingMethod balancing.Method
+		accept  ippool.Pool
+		deny    ippool.Pool
+		servers ippool.ServerPool
+		filter  ippool.Filter
+		toport  string
 	)
-	handlderLogDir := logDir + "/" + protocol + "_" + port
-	err := os.MkdirAll(handlderLogDir, 0644)
-	if err != nil {
-		return nil, err
-	}
+
 	if valf, ok := hconf["accept"]; ok && valf != nil {
 		if val, ok := valf.(string); ok && strings.HasPrefix(val, "$") {
 			accept, ok = db.GetPoolCopy(val[1:])
 			if !ok {
-				return nil, fmt.Errorf("error: invalid accept pool name %v is not exist in port handler %v %v", val, protocol, port)
+				return nil, fmt.Errorf("error: invalid accept pool name %v is not exist in port handler %v", val, port)
 			}
 		} else if val, ok := valf.([]string); ok {
 			p := ippool.Pool{}
@@ -64,7 +56,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 			}
 			accept = p
 		} else {
-			return nil, fmt.Errorf("error: invalid accept pool %v in port handler %v %v", valf, protocol, port)
+			return nil, fmt.Errorf("error: invalid accept pool %v in port handler %v", valf, port)
 		}
 	}
 
@@ -73,7 +65,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 		if val, ok := valf.(string); ok && strings.HasPrefix(val, "$") {
 			deny, ok = db.GetPoolCopy(val[1:])
 			if !ok {
-				return nil, fmt.Errorf("error: invalid deny pool name %v is not exist in port handler %v %v", val, protocol, port)
+				return nil, fmt.Errorf("error: invalid deny pool name %v is not exist in port handler %v", val, port)
 			}
 		} else if val, ok := valf.([]string); ok {
 			p := ippool.Pool{}
@@ -83,7 +75,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 			}
 			deny = p
 		} else {
-			return nil, fmt.Errorf("error: invalid deny pool %v in port handler %v %v", valf, protocol, port)
+			return nil, fmt.Errorf("error: invalid deny pool %v in port handler %v", valf, port)
 		}
 	}
 
@@ -91,7 +83,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 		if val, ok := valf.(string); ok && strings.HasPrefix(val, "$") {
 			servers, ok = db.GetServerPoolCopy(val[1:])
 			if !ok {
-				return nil, fmt.Errorf("error: invalid server pool name %v is not existin port handler %v %v", val, protocol, port)
+				return nil, fmt.Errorf("error: invalid server pool name %v is not existin port handler %v", val, port)
 			}
 		} else if val, ok := valf.(map[string]interface{}); ok {
 			p := ippool.ServerPool{}
@@ -101,10 +93,10 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 			}
 			servers = p
 		} else {
-			return nil, fmt.Errorf("error: invalid server pool %v in port handler %v %v", valf, protocol, port)
+			return nil, fmt.Errorf("error: invalid server pool %v in port handler %v", valf, port)
 		}
 	}
-	err = servers.SetLogFile(handlderLogDir + "/servers")
+	err := servers.SetLogFile(handlerLogDir + "/servers")
 
 	if err != nil {
 		return nil, err
@@ -113,11 +105,11 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 		if val, ok := valf.(string); ok && strings.HasPrefix(val, "$") {
 			filter, ok = db.GetFilterCopy(val[1:])
 			if !ok {
-				return nil, fmt.Errorf("error: filter %v in port handler %s %s is exist", filter, protocol, port)
+				return nil, fmt.Errorf("error: filter %v in port handler %s is exist", filter, port)
 			}
 		} else {
 			return nil,
-				fmt.Errorf("error: invalid filter name %v in port handler, filter must be in 'filters' in port handler %s %s", valf, protocol, port)
+				fmt.Errorf("error: invalid filter name %v in port handler, filter must be in 'filters' in port handler %s", valf, port)
 		}
 	}
 
@@ -127,7 +119,7 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 	if valf, ok := hconf["toport"]; ok && valf != nil {
 		val, ok := valf.(int)
 		if !ok {
-			return nil, fmt.Errorf("error: invalid port number %v in port hangler %s %s", valf, protocol, port)
+			return nil, fmt.Errorf("error: invalid port number %v in port hangler %s", valf, port)
 		}
 		if val < 0 || val > 65535 {
 			return nil, fmt.Errorf("error: invalid port number %d", val)
@@ -140,17 +132,36 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 	if valf, ok := hconf["balancingMethod"]; ok && valf != nil {
 		val, ok := valf.(string)
 		if !ok {
-			return nil, fmt.Errorf("error: invalid balancing method %v in port handler %s %s", valf, protocol, port)
+			return nil, fmt.Errorf("error: invalid balancing method %v in port handler %s", valf, port)
 		}
-		var err error
-		balancingMethod, err = balancing.NewMethod(val)
+
+		err := servers.SetBalancingMethod(val)
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		balancingMethod, _ = balancing.NewMethod("roundRobin")
+		err = filter.SetBalancingMethod(val)
+		if err != nil {
+			return nil, err
+		}
 	}
+	h := &Config{
+		accept:  accept,
+		deny:    deny,
+		servers: servers,
+		filter:  filter,
+		toport:  toport,
+	}
+	return h, nil
 
+}
+
+//
+//	the struct that keep info about "microprogramm" that listen the port
+//
+func NewHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface{}, logDir string) (*Handler, error) {
+
+	handlderLogDir := logDir + "/" + protocol + "_" + port
+	err := os.MkdirAll(handlderLogDir, 0644)
 	if err != nil {
 		return nil, err
 	}
@@ -159,33 +170,33 @@ func NewPortHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]inter
 	if err != nil {
 		return nil, err
 	}
+	config, err := NewConfig(hconf, db, port, handlderLogDir)
+	if err != nil {
+		return nil, err
+	}
 	logger := log.New(file, "andproxy server log: ", log.LstdFlags)
 	logger.SetFlags(log.LstdFlags)
-
-	h := &PortHandler{
-		port:            port,
-		protocol:        protocol,
-		accept:          accept,
-		deny:            deny,
-		servers:         servers,
-		filter:          filter,
-		toport:          toport,
-		balancingMethod: balancingMethod,
-		logger:          logger,
+	NewConfig(hconf, db, port, handlderLogDir)
+	h := &Handler{
+		port:     port,
+		protocol: protocol,
+		config:   config,
+		logger:   logger,
 	}
 	return h, nil
 
 }
 
-func (h *PortHandler) Handle() {
+func (h *Handler) Handle() {
 	go h.handle()
 }
 
 //
 //	start listenting the port
 //
-func (h *PortHandler) handle() error {
+func (h *Handler) handle() error {
 	server, err := net.Listen(h.protocol, "0.0.0.0:"+h.port)
+	fmt.Println("aaa")
 	if err != nil {
 		return err
 	}
@@ -194,22 +205,21 @@ func (h *PortHandler) handle() error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("aaa")
 		clientAddress, _, err := net.SplitHostPort(conn.RemoteAddr().String())
 		if err != nil {
 			return err
 		}
-		v, err := h.filter.WhatPool(clientAddress)
+		v, err := h.config.filter.WhatPool(clientAddress)
 		if err != nil {
 			return err
 		}
-		if !h.accept.Empty() {
-			if yes, _ := h.accept.Contains(clientAddress); !yes {
+		if !h.config.accept.Empty() {
+			if yes, _ := h.config.accept.Contains(clientAddress); !yes {
 				h.logger.Printf("acccess denied to %v because it not in accept list\n", clientAddress)
 				continue
 			}
-		} else if !h.deny.Empty() {
-			if yes, _ := h.deny.Contains(clientAddress); yes {
+		} else if !h.config.deny.Empty() {
+			if yes, _ := h.config.deny.Contains(clientAddress); yes {
 				h.logger.Printf("acccess denied to %v because it in deny list\n", clientAddress)
 				continue
 			}
@@ -219,15 +229,14 @@ func (h *PortHandler) handle() error {
 		if v != nil {
 			go h.exchangeData(clientAddress, v, conn)
 		} else {
-			go h.exchangeData(clientAddress, &h.servers, conn)
+			go h.exchangeData(clientAddress, &h.config.servers, conn)
 		}
-		fmt.Println("bbb")
 	}
 }
 
-func (h *PortHandler) exchangeData(clientAddr string, srvPool *ippool.ServerPool, clientConn net.Conn) {
+func (h *Handler) exchangeData(clientAddr string, srvPool *ippool.ServerPool, clientConn net.Conn) {
 	fmt.Println(clientConn)
-	srv, err := h.balancingMethod.FindServer(clientAddr, srvPool)
+	srv, err := srvPool.FindServer(clientAddr)
 	if err != nil {
 		h.logger.Println(err)
 		return
@@ -235,8 +244,9 @@ func (h *PortHandler) exchangeData(clientAddr string, srvPool *ippool.ServerPool
 	srvConn, err := srv.Connect(h.protocol, h.port)
 	if err != nil {
 		h.logger.Println(err)
-		for i := 0; i < len(srvPool.Servers); i++ {
-			srv, err := h.balancingMethod.FindAnotherServer(clientAddr, srvPool)
+		srvPool.UpdateBroken()
+		for i := 0; i < len(srvPool.Servers)*srv.MaxFails; i++ {
+			srv, err := srvPool.FindServer(clientAddr)
 			if err != nil {
 				return
 			}
@@ -247,8 +257,13 @@ func (h *PortHandler) exchangeData(clientAddr string, srvPool *ippool.ServerPool
 
 		}
 	}
+	defer srv.Disconnect(srvConn)
+	defer clientConn.Close()
 	srv.ExchangeData(clientConn, srvConn)
-	fmt.Println("here")
-	srv.Disconnect(srvConn)
-	clientConn.Close()
+
+}
+
+func (h *Handler) UpdateConfig(c *Config) {
+	h.config = c
+	fmt.Println(h.config.servers.Servers)
 }

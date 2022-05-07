@@ -36,6 +36,21 @@ func (f *Filter) SetLogFile(logDir string) error {
 	return nil
 }
 
+func (f *Filter) SetBalancingMethod(bm string) error {
+	for i := 0; i < len(f.filters); i++ {
+		err := f.filters[i].srvpool.SetBalancingMethod(bm)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (f *filterElement) SetBalancingMethod(bm string) error {
+	err := f.srvpool.SetBalancingMethod(bm)
+	return err
+}
+
 //
 //	i don't know that to say
 //

@@ -15,7 +15,7 @@ type Server struct {
 	Addr                     netip.Addr
 	Broken                   bool
 	Weight                   int
-	Priority                 int
+	Priority                 float64
 	fails                    int
 	MaxFails                 int
 	AvgDataExchangeTime      int64
@@ -102,9 +102,7 @@ func (s *Server) ExchangeData(client net.Conn, server net.Conn) {
 			s.logger.Println(err)
 			return
 		}
-		fmt.Println("qwer")
 	}
-	fmt.Println("asdf")
 	dur := time.Since(start)
 	duration := dur.Microseconds()
 	s.AvgDataExchangeTime = (s.AvgDataExchangeTime*int64(s.ConnectionsNumber-1)/
@@ -120,7 +118,6 @@ func (s *Server) Disconnect(conn net.Conn) error {
 	}
 	s.logger.Printf("connection closed\n")
 	s.CurrentConnectionsNumber--
-	fmt.Printf("Connect closed")
 	return nil
 }
 
@@ -165,6 +162,45 @@ func (s *Server) CheckLogFile() {
 //
 type ServerPool struct {
 	Servers []Server
+	Broken  []Server
+	bm      BalancingMethod
+}
+
+func (s *ServerPool) UpdateBroken() {
+	for i := 0; i < len(s.Servers); i++ {
+		if s.Servers[i].Broken {
+			s.Broken = append(s.Broken, s.Servers[i])
+			s.Servers = append(s.Servers[:i], s.Servers[i+1:]...)
+		}
+	}
+	for i := 0; i < len(s.Broken); i++ {
+		if !s.Broken[i].Broken {
+			s.Servers = append(s.Servers, s.Broken[i])
+			s.Broken = append(s.Broken[:i], s.Broken[i+1:]...)
+		}
+	}
+	s.bm.Rebalance(s.Servers)
+}
+
+func (s *ServerPool) SetBalancingMethod(name string) error {
+	bm, err := NewBalancingMethod(name)
+	if err != nil {
+		return err
+	}
+	s.bm = bm
+	return nil
+}
+
+func (s *ServerPool) FindServer(ip string) (*Server, error) {
+	srv, err := s.bm.FindServer(ip, s.Servers)
+	if err != nil {
+		return nil, err
+	}
+	return srv, nil
+}
+
+func (s *ServerPool) Rebalance() {
+	s.bm.Rebalance(s.Servers)
 }
 
 func (s *ServerPool) SetLogFile(logDir string) error {
@@ -254,6 +290,13 @@ func (p *ServerPool) Add(addresses string, config map[string]interface{}) error 
 //
 func (p *ServerPool) AddFromMap(m map[string]interface{}) error {
 	for addresses, config := range m {
+		if addresses == "balancingMethod" {
+			err := p.SetBalancingMethod(addresses)
+			if err != nil {
+				return err
+			}
+			continue
+		}
 		if config == nil {
 			err := p.Add(addresses, make(map[string]interface{}))
 			if err != nil {
@@ -278,6 +321,7 @@ func (p *ServerPool) AddFromMap(m map[string]interface{}) error {
 //
 func NewServerPool(m map[string]interface{}) (*ServerPool, error) {
 	p := new(ServerPool)
+	p.SetBalancingMethod("roundRobin")
 	err := p.AddFromMap(m)
 	if err != nil {
 		return nil, err
