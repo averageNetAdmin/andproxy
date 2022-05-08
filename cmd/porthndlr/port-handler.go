@@ -1,6 +1,7 @@
 package porthndlr
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
@@ -8,26 +9,26 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/averageNetAdmin/andproxy//cmd/ipdb"
-	"github.com/averageNetAdmin/andproxy//cmd/ippool"
+	"github.com/averageNetAdmin/andproxy/cmd/ipdb"
+	"github.com/averageNetAdmin/andproxy/cmd/ippool"
 )
 
 //
 //	the struct that keep info about "microprogramm" that listen the port
 //
 type Handler struct {
-	port     string
-	protocol string
-	config   *Config
+	Port     string
+	Protocol string
+	Config   *Config
 	logger   *log.Logger
 }
 
 type Config struct {
-	accept           ippool.Pool
-	deny             ippool.Pool
-	servers          ippool.ServerPool
-	filter           ippool.Filter
-	toport           string
+	Accept           ippool.Pool
+	Deny             ippool.Pool
+	Servers          ippool.ServerPool
+	Filter           ippool.Filter
+	Toport           string
 	ServersWeight    int
 	ServersMaxFails  int
 	ServersBreakTime int
@@ -86,12 +87,11 @@ func NewConfig(hconf map[string]interface{}, db *ipdb.IPDB, port, handlerLogDir 
 				return nil, fmt.Errorf("error: invalid server pool name %v is not existin port handler %v", val, port)
 			}
 		} else if val, ok := valf.(map[string]interface{}); ok {
-			p := ippool.ServerPool{}
-			err := p.AddFromMap(val)
+			p, err := ippool.NewServerPool(val)
 			if err != nil {
 				return nil, err
 			}
-			servers = p
+			servers = *p
 		} else {
 			return nil, fmt.Errorf("error: invalid server pool %v in port handler %v", valf, port)
 		}
@@ -129,12 +129,11 @@ func NewConfig(hconf map[string]interface{}, db *ipdb.IPDB, port, handlerLogDir 
 		toport = port
 	}
 
-	if valf, ok := hconf["balancingMethod"]; ok && valf != nil {
+	if valf, ok := hconf["balancingmethod"]; ok && valf != nil {
 		val, ok := valf.(string)
 		if !ok {
 			return nil, fmt.Errorf("error: invalid balancing method %v in port handler %s", valf, port)
 		}
-
 		err := servers.SetBalancingMethod(val)
 		if err != nil {
 			return nil, err
@@ -144,12 +143,14 @@ func NewConfig(hconf map[string]interface{}, db *ipdb.IPDB, port, handlerLogDir 
 			return nil, err
 		}
 	}
+	servers.Rebalance()
+	filter.Rebalance()
 	h := &Config{
-		accept:  accept,
-		deny:    deny,
-		servers: servers,
-		filter:  filter,
-		toport:  toport,
+		Accept:  accept,
+		Deny:    deny,
+		Servers: servers,
+		Filter:  filter,
+		Toport:  toport,
 	}
 	return h, nil
 
@@ -178,9 +179,9 @@ func NewHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface
 	logger.SetFlags(log.LstdFlags)
 	NewConfig(hconf, db, port, handlderLogDir)
 	h := &Handler{
-		port:     port,
-		protocol: protocol,
-		config:   config,
+		Port:     port,
+		Protocol: protocol,
+		Config:   config,
 		logger:   logger,
 	}
 	return h, nil
@@ -195,8 +196,7 @@ func (h *Handler) Handle() {
 //	start listenting the port
 //
 func (h *Handler) handle() error {
-	server, err := net.Listen(h.protocol, "0.0.0.0:"+h.port)
-	fmt.Println("aaa")
+	server, err := net.Listen(h.Protocol, "0.0.0.0:"+h.Port)
 	if err != nil {
 		return err
 	}
@@ -209,39 +209,38 @@ func (h *Handler) handle() error {
 		if err != nil {
 			return err
 		}
-		v, err := h.config.filter.WhatPool(clientAddress)
+		v, err := h.Config.Filter.WhatPool(clientAddress)
 		if err != nil {
 			return err
 		}
-		if !h.config.accept.Empty() {
-			if yes, _ := h.config.accept.Contains(clientAddress); !yes {
+		if !h.Config.Accept.Empty() {
+			if yes, _ := h.Config.Accept.Contains(clientAddress); !yes {
 				h.logger.Printf("acccess denied to %v because it not in accept list\n", clientAddress)
 				continue
 			}
-		} else if !h.config.deny.Empty() {
-			if yes, _ := h.config.deny.Contains(clientAddress); yes {
+		} else if !h.Config.Deny.Empty() {
+			if yes, _ := h.Config.Deny.Contains(clientAddress); yes {
 				h.logger.Printf("acccess denied to %v because it in deny list\n", clientAddress)
 				continue
 			}
 		}
-		fmt.Println(conn)
 		h.logger.Printf("successfull connection from %v \n", clientAddress)
 		if v != nil {
 			go h.exchangeData(clientAddress, v, conn)
 		} else {
-			go h.exchangeData(clientAddress, &h.config.servers, conn)
+			go h.exchangeData(clientAddress, &h.Config.Servers, conn)
 		}
 	}
 }
 
 func (h *Handler) exchangeData(clientAddr string, srvPool *ippool.ServerPool, clientConn net.Conn) {
-	fmt.Println(clientConn)
+
 	srv, err := srvPool.FindServer(clientAddr)
 	if err != nil {
 		h.logger.Println(err)
 		return
 	}
-	srvConn, err := srv.Connect(h.protocol, h.port)
+	srvConn, err := srv.Connect(h.Protocol, h.Config.Toport)
 	if err != nil {
 		h.logger.Println(err)
 		srvPool.UpdateBroken()
@@ -250,20 +249,22 @@ func (h *Handler) exchangeData(clientAddr string, srvPool *ippool.ServerPool, cl
 			if err != nil {
 				return
 			}
-			srvConn, err = srv.Connect(h.protocol, h.port)
+			srvConn, err = srv.Connect(h.Protocol, h.Config.Toport)
 			if err == nil {
 				break
 			}
-
+		}
+		if srvConn == nil {
+			return
 		}
 	}
-	defer srv.Disconnect(srvConn)
-	defer clientConn.Close()
+	val, _ := json.Marshal(h)
+	fmt.Println(string(val))
 	srv.ExchangeData(clientConn, srvConn)
-
+	srv.Disconnect(srvConn)
+	clientConn.Close()
 }
 
 func (h *Handler) UpdateConfig(c *Config) {
-	h.config = c
-	fmt.Println(h.config.servers.Servers)
+	h.Config = c
 }

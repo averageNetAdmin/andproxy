@@ -53,6 +53,9 @@ func (m *RoundRobin) FindServer(sIP string, p []Server) (*Server, error) {
 }
 
 func (m *RoundRobin) Rebalance(p []Server) {
+	if len(p) == 0 {
+		return
+	}
 	if m.weightCounter > p[m.counter%len(p)].Weight {
 		m.weightCounter = p[m.counter%len(p)].Weight
 	}
@@ -73,6 +76,9 @@ func (m *Random) FindServer(sIP string, p []Server) (*Server, error) {
 }
 
 func (m *Random) Rebalance(p []Server) {
+	if len(p) == 0 {
+		return
+	}
 	counter := 0
 	for i := 0; i < len(p); i++ {
 		for ii := p[i].Weight; ii > 0; ii-- {
@@ -93,6 +99,9 @@ func (m *None) FindServer(sIP string, p []Server) (*Server, error) {
 }
 
 func (m *None) Rebalance(p []Server) {
+	if len(p) == 0 {
+		return
+	}
 	weight := 0
 	highPriority := 0
 	for i := 0; i < len(p); i++ {
@@ -142,6 +151,9 @@ func (m *Auto) FindServer(sIP string, p []Server) (*Server, error) {
 }
 
 func (m *Auto) Rebalance(p []Server) {
+	if len(p) == 0 {
+		return
+	}
 	for i := 1; i < len(p); i++ {
 		p[i].Priority = float64(p[i].Weight / (int(p[i].AvgConnectTime) * int(p[i].AvgDataExchangeTime/100)))
 	}
@@ -162,6 +174,9 @@ func (m *HashIP) FindServer(sIP string, p []Server) (*Server, error) {
 }
 
 func (m *HashIP) Rebalance(p []Server) {
+	if len(p) == 0 {
+		return
+	}
 	counter := 0
 	for i := 0; i < len(p); i++ {
 		for ii := p[i].Weight; ii > 0; ii-- {

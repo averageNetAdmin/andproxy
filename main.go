@@ -19,6 +19,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer listen.Close()
 	for {
 		conn, err := listen.Accept()
 		if err != nil {
@@ -41,5 +42,6 @@ func main() {
 		default:
 			continue
 		}
+		conn.Close()
 	}
 }

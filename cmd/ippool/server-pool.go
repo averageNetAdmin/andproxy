@@ -2,12 +2,14 @@ package ippool
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/netip"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -16,13 +18,13 @@ type Server struct {
 	Broken                   bool
 	Weight                   int
 	Priority                 float64
-	fails                    int
+	Fails                    int
 	MaxFails                 int
 	AvgDataExchangeTime      int64
 	AvgConnectTime           int64
 	ConnectionsNumber        int
 	CurrentConnectionsNumber int
-	breakTime                int
+	BreakTime                int
 	logger                   *log.Logger
 }
 
@@ -43,12 +45,12 @@ func NewServer(addr netip.Addr, weight, maxFails, breakTime int) *Server {
 		MaxFails:                 maxFails,
 		Broken:                   false,
 		Priority:                 1,
-		fails:                    0,
+		Fails:                    0,
 		AvgDataExchangeTime:      0,
 		AvgConnectTime:           0,
 		ConnectionsNumber:        0,
 		CurrentConnectionsNumber: 0,
-		breakTime:                breakTime,
+		BreakTime:                breakTime,
 	}
 }
 
@@ -74,41 +76,29 @@ func (s *Server) Connect(proto, port string) (net.Conn, error) {
 
 func (s *Server) ExchangeData(client net.Conn, server net.Conn) {
 	start := time.Now()
-	dataRecieved := 0
-	dataSended := 0
-	packetsReceived := 0
-	packetsSended := 0
-	for {
-		packet := make([]byte, 1500)
-		n, err := client.Read(packet)
-		if err != nil {
-			break
-		}
-		dataRecieved += n
-		packetsReceived++
-		_, err = server.Write(packet[:n])
-		if err != nil {
-			s.logger.Println(err)
-			return
-		}
-		n, err = server.Read(packet)
-		if err != nil {
-			break
-		}
-		n, err = client.Write(packet[:n])
-		dataSended += n
-		packetsSended++
-		if err != nil {
-			s.logger.Println(err)
-			return
-		}
+	var dataRecieved int64
+	var dataSended int64
+	var err error
+	wg := new(sync.WaitGroup)
+	wg.Add(2)
+	go func() {
+		dataRecieved, err = io.Copy(client, server)
+		wg.Done()
+	}()
+	go func() {
+		dataSended, err = io.Copy(server, client)
+		wg.Done()
+	}()
+	if err != nil {
+		s.logger.Println(err)
 	}
+	wg.Wait()
 	dur := time.Since(start)
 	duration := dur.Microseconds()
 	s.AvgDataExchangeTime = (s.AvgDataExchangeTime*int64(s.ConnectionsNumber-1)/
 		int64(s.ConnectionsNumber) + duration) / int64(s.ConnectionsNumber)
-	s.logger.Printf("successfull data exchange with %v. %d packets recieved %d packets sended, %d, bytes received, %d bytes sended, session time: %v\n",
-		client.RemoteAddr().String(), packetsReceived, packetsSended, dataRecieved, dataSended, dur.String())
+	s.logger.Printf("successfull data exchange with %v. %d, bytes received, %d bytes sended, session time: %v\n",
+		client.RemoteAddr().String(), dataRecieved, dataSended, dur.String())
 }
 
 func (s *Server) Disconnect(conn net.Conn) error {
@@ -122,13 +112,13 @@ func (s *Server) Disconnect(conn net.Conn) error {
 }
 
 func (s *Server) Fail() {
-	s.fails++
-	s.logger.Printf("server is failed %d times\n", s.fails)
-	if s.fails == s.MaxFails {
+	s.Fails++
+	s.logger.Printf("server is failed %d times\n", s.Fails)
+	if s.Fails == s.MaxFails {
 		s.Broken = true
-		s.fails = 0
+		s.Fails = 0
 		s.logger.Printf("max fails reached, server is break\n")
-		time.AfterFunc(time.Second*time.Duration(s.breakTime), func() {
+		time.AfterFunc(time.Second*time.Duration(s.BreakTime), func() {
 			s.logger.Printf("server is return to work\n")
 			s.Broken = false
 		})
@@ -163,7 +153,7 @@ func (s *Server) CheckLogFile() {
 type ServerPool struct {
 	Servers []Server
 	Broken  []Server
-	bm      BalancingMethod
+	BM      BalancingMethod
 }
 
 func (s *ServerPool) UpdateBroken() {
@@ -179,7 +169,7 @@ func (s *ServerPool) UpdateBroken() {
 			s.Broken = append(s.Broken[:i], s.Broken[i+1:]...)
 		}
 	}
-	s.bm.Rebalance(s.Servers)
+	s.BM.Rebalance(s.Servers)
 }
 
 func (s *ServerPool) SetBalancingMethod(name string) error {
@@ -187,12 +177,12 @@ func (s *ServerPool) SetBalancingMethod(name string) error {
 	if err != nil {
 		return err
 	}
-	s.bm = bm
+	s.BM = bm
 	return nil
 }
 
 func (s *ServerPool) FindServer(ip string) (*Server, error) {
-	srv, err := s.bm.FindServer(ip, s.Servers)
+	srv, err := s.BM.FindServer(ip, s.Servers)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +190,7 @@ func (s *ServerPool) FindServer(ip string) (*Server, error) {
 }
 
 func (s *ServerPool) Rebalance() {
-	s.bm.Rebalance(s.Servers)
+	s.BM.Rebalance(s.Servers)
 }
 
 func (s *ServerPool) SetLogFile(logDir string) error {
@@ -390,20 +380,20 @@ func (s *Server) SetConfig(weight, maxFails, breakTime string) error {
 		if err != nil {
 			return err
 		}
-		s.breakTime = w
+		s.BreakTime = w
 	} else if strings.HasPrefix(breakTime, "*") {
 		b, err := strconv.Atoi(breakTime[1:])
 		if err != nil {
 			return err
 		}
-		s.breakTime *= b
+		s.BreakTime *= b
 	} else {
 		b, err := strconv.Atoi(breakTime)
 		if err != nil {
 			return err
 		}
-		if s.breakTime == 1 {
-			s.breakTime = b
+		if s.BreakTime == 1 {
+			s.BreakTime = b
 		}
 	}
 

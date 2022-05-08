@@ -11,24 +11,34 @@ type Filter struct {
 //	the struct that compare cliets addresses and servers to which should be forwarded requests
 //
 type filterElement struct {
-	pool    Pool
-	srvpool ServerPool
+	Pool    Pool
+	Srvpool ServerPool
 }
 
 //
 //	chcek IP pool contain IP address or not
 //
 func (elem *filterElement) Contains(ip string) (bool, error) {
-	yes, err := elem.pool.Contains(ip)
+	yes, err := elem.Pool.Contains(ip)
 	if err != nil {
 		return false, err
 	}
 	return yes, nil
 }
 
+func (elem *filterElement) Rebalance() {
+	elem.Srvpool.Rebalance()
+}
+
+func (f *Filter) Rebalance() {
+	for i := 0; i < len(f.filters); i++ {
+		f.filters[i].Srvpool.Rebalance()
+	}
+}
+
 func (f *Filter) SetLogFile(logDir string) error {
 	for i := 0; i < len(f.filters); i++ {
-		err := f.filters[i].srvpool.SetLogFile(logDir)
+		err := f.filters[i].Srvpool.SetLogFile(logDir)
 		if err != nil {
 			return err
 		}
@@ -38,7 +48,7 @@ func (f *Filter) SetLogFile(logDir string) error {
 
 func (f *Filter) SetBalancingMethod(bm string) error {
 	for i := 0; i < len(f.filters); i++ {
-		err := f.filters[i].srvpool.SetBalancingMethod(bm)
+		err := f.filters[i].Srvpool.SetBalancingMethod(bm)
 		if err != nil {
 			return err
 		}
@@ -47,7 +57,7 @@ func (f *Filter) SetBalancingMethod(bm string) error {
 }
 
 func (f *filterElement) SetBalancingMethod(bm string) error {
-	err := f.srvpool.SetBalancingMethod(bm)
+	err := f.Srvpool.SetBalancingMethod(bm)
 	return err
 }
 
@@ -55,22 +65,22 @@ func (f *filterElement) SetBalancingMethod(bm string) error {
 //	i don't know that to say
 //
 func (elem *filterElement) SetPool(p *Pool) {
-	elem.pool = *p
+	elem.Pool = *p
 }
 
 //
 //	i don't know that to say
 //
 func (elem *filterElement) SetServerPool(p *ServerPool) {
-	elem.srvpool = *p
+	elem.Srvpool = *p
 }
 
 //
 //	i don't know that to say
 //
 func (elem *filterElement) Set(pool *Pool, srvpool *ServerPool) {
-	elem.pool = *pool
-	elem.srvpool = *srvpool
+	elem.Pool = *pool
+	elem.Srvpool = *srvpool
 }
 
 //
@@ -78,8 +88,8 @@ func (elem *filterElement) Set(pool *Pool, srvpool *ServerPool) {
 //
 func newFilterElement(pool *Pool, srvpool *ServerPool) filterElement {
 	return filterElement{
-		pool:    *pool,
-		srvpool: *srvpool,
+		Pool:    *pool,
+		Srvpool: *srvpool,
 	}
 }
 
@@ -101,7 +111,7 @@ func (f *Filter) WhatPool(ip string) (*ServerPool, error) {
 			return nil, err
 		}
 		if isContent {
-			return &felem.srvpool, nil
+			return &felem.Srvpool, nil
 		}
 	}
 

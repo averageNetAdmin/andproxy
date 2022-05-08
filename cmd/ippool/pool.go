@@ -12,8 +12,8 @@ import (
 // 	and IP networks "192.168.0.0/24"
 //
 type Pool struct {
-	addr []netip.Addr
-	nets []netip.Prefix
+	Addr []netip.Addr
+	Nets []netip.Prefix
 }
 
 //
@@ -21,10 +21,10 @@ type Pool struct {
 //
 func (ar *Pool) String() string {
 	result := "["
-	for _, addr := range ar.addr {
+	for _, addr := range ar.Addr {
 		result += addr.String() + " "
 	}
-	for _, s := range ar.nets {
+	for _, s := range ar.Nets {
 		result += s.String() + " "
 	}
 	return result + "]"
@@ -39,12 +39,12 @@ func (p *Pool) Contains(searchIP string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	for _, a := range p.addr {
+	for _, a := range p.Addr {
 		if a.Compare(sIP) == 0 {
 			return true, nil
 		}
 	}
-	for _, n := range p.nets {
+	for _, n := range p.Nets {
 		if n.Contains(sIP) {
 			return true, nil
 		}
@@ -65,19 +65,19 @@ func (p *Pool) Add(ip string) error {
 		if err != nil {
 			return err
 		}
-		p.addr = append(p.addr, rng...)
+		p.Addr = append(p.Addr, rng...)
 	} else if isNet {
 		net, err := netip.ParsePrefix(ip)
 		if err != nil {
 			return err
 		}
-		p.nets = append(p.nets, net)
+		p.Nets = append(p.Nets, net)
 	} else {
 		addr, err := netip.ParseAddr(ip)
 		if err != nil {
 			return err
 		}
-		p.addr = append(p.addr, addr)
+		p.Addr = append(p.Addr, addr)
 	}
 	return nil
 }
@@ -108,7 +108,7 @@ func NewPool(ip ...string) (*Pool, error) {
 }
 
 func (p *Pool) Empty() bool {
-	if len(p.addr) == 0 && len(p.nets) == 0 {
+	if len(p.Addr) == 0 && len(p.Nets) == 0 {
 		return true
 	}
 	return false
