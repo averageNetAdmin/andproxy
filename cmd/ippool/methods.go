@@ -155,7 +155,7 @@ func (m *Auto) Rebalance(p []Server) {
 		return
 	}
 	for i := 1; i < len(p); i++ {
-		p[i].Priority = float64(p[i].Weight / (int(p[i].AvgConnectTime) * int(p[i].AvgDataExchangeTime/100)))
+		p[i].Priority = float64(p[i].Weight / (int(p[i].stats.AvgConnectTime) * int(p[i].stats.AvgDataExchangeTime/100)))
 	}
 }
 

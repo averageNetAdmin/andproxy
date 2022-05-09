@@ -12,22 +12,9 @@ import (
 // 	and IP networks "192.168.0.0/24"
 //
 type Pool struct {
+	Name string
 	Addr []netip.Addr
 	Nets []netip.Prefix
-}
-
-//
-//	display all IP addresses and networks
-//
-func (ar *Pool) String() string {
-	result := "["
-	for _, addr := range ar.Addr {
-		result += addr.String() + " "
-	}
-	for _, s := range ar.Nets {
-		result += s.String() + " "
-	}
-	return result + "]"
 }
 
 //

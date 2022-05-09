@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/averageNetAdmin/andproxy/cmd/ipdb"
 	"github.com/averageNetAdmin/andproxy/cmd/ippool"
@@ -17,10 +18,13 @@ import (
 //	the struct that keep info about "microprogramm" that listen the port
 //
 type Handler struct {
-	Port     string
-	Protocol string
-	Config   *Config
-	logger   *log.Logger
+	Port           string
+	Protocol       string
+	Config         *Config
+	ConnNumber     uint64
+	DeniedConnNumb uint64
+	Run            bool
+	logger         *log.Logger
 }
 
 type Config struct {
@@ -96,7 +100,7 @@ func NewConfig(hconf map[string]interface{}, db *ipdb.IPDB, port, handlerLogDir 
 			return nil, fmt.Errorf("error: invalid server pool %v in port handler %v", valf, port)
 		}
 	}
-	err := servers.SetLogFile(handlerLogDir + "/servers")
+	err := servers.SetLogFile(fmt.Sprintf("%s/servers", handlerLogDir))
 
 	if err != nil {
 		return nil, err
@@ -161,13 +165,12 @@ func NewConfig(hconf map[string]interface{}, db *ipdb.IPDB, port, handlerLogDir 
 //
 func NewHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface{}, logDir string) (*Handler, error) {
 
-	handlderLogDir := logDir + "/" + protocol + "_" + port
+	handlderLogDir := fmt.Sprintf("%s/%s_%s", logDir, protocol, port)
 	err := os.MkdirAll(handlderLogDir, 0644)
 	if err != nil {
 		return nil, err
 	}
-	handlerLogFile := handlderLogDir + "/handler.log"
-	file, err := os.OpenFile(handlerLogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(fmt.Sprintf("%s/handler.log", handlderLogDir), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return nil, err
 	}
@@ -175,7 +178,7 @@ func NewHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface
 	if err != nil {
 		return nil, err
 	}
-	logger := log.New(file, "andproxy server log: ", log.LstdFlags)
+	logger := log.New(file, fmt.Sprintf("handler %s_%s", protocol, port), log.LstdFlags)
 	logger.SetFlags(log.LstdFlags)
 	NewConfig(hconf, db, port, handlderLogDir)
 	h := &Handler{
@@ -189,6 +192,7 @@ func NewHandler(protocol, port string, db *ipdb.IPDB, hconf map[string]interface
 }
 
 func (h *Handler) Handle() {
+	h.Run = true
 	go h.handle()
 }
 
@@ -196,15 +200,19 @@ func (h *Handler) Handle() {
 //	start listenting the port
 //
 func (h *Handler) handle() error {
-	server, err := net.Listen(h.Protocol, "0.0.0.0:"+h.Port)
+	server, err := net.Listen(h.Protocol, net.JoinHostPort("0.0.0.0", h.Port))
 	if err != nil {
 		return err
 	}
 	for {
+		if !h.Run {
+			return nil
+		}
 		conn, err := server.Accept()
 		if err != nil {
 			return err
 		}
+		h.ConnNumber++
 		clientAddress, _, err := net.SplitHostPort(conn.RemoteAddr().String())
 		if err != nil {
 			return err
@@ -216,11 +224,13 @@ func (h *Handler) handle() error {
 		if !h.Config.Accept.Empty() {
 			if yes, _ := h.Config.Accept.Contains(clientAddress); !yes {
 				h.logger.Printf("acccess denied to %v because it not in accept list\n", clientAddress)
+				h.DeniedConnNumb++
 				continue
 			}
 		} else if !h.Config.Deny.Empty() {
 			if yes, _ := h.Config.Deny.Contains(clientAddress); yes {
 				h.logger.Printf("acccess denied to %v because it in deny list\n", clientAddress)
+				h.DeniedConnNumb++
 				continue
 			}
 		}
@@ -258,8 +268,6 @@ func (h *Handler) exchangeData(clientAddr string, srvPool *ippool.ServerPool, cl
 			return
 		}
 	}
-	val, _ := json.Marshal(h)
-	fmt.Println(string(val))
 	srv.ExchangeData(clientConn, srvConn)
 	srv.Disconnect(srvConn)
 	clientConn.Close()
@@ -267,4 +275,31 @@ func (h *Handler) exchangeData(clientAddr string, srvPool *ippool.ServerPool, cl
 
 func (h *Handler) UpdateConfig(c *Config) {
 	h.Config = c
+}
+
+func (h *Handler) Stop() {
+	h.Run = false
+}
+
+func (h *Handler) SaveState() error {
+	dirName := fmt.Sprintf("/var/lib/andproxy/states/%s_%s", h.Protocol, h.Port)
+	t := time.Now()
+	fileName := fmt.Sprintf("%s/%s", dirName, t.Format("2006-01-02T15:04:05"))
+	err := os.MkdirAll(dirName, 0700)
+	if err != nil {
+		return err
+	}
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_CREATE, 0700)
+	if err != nil {
+		return err
+	}
+	info, err := json.Marshal(h)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(info)
+	if err != nil {
+		return err
+	}
+	return nil
 }

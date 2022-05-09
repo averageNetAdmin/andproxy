@@ -9,11 +9,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func ReadAndCreate(CONFIGFILEPATH string) (map[string]*porthndlr.Handler, error) {
+func ReadAndCreate(CONFIGFILEPATH string) (map[string]*porthndlr.Handler, string, error) {
 
 	a, db, logDir, err := read(CONFIGFILEPATH)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	hdnlrs := make(map[string]*porthndlr.Handler)
@@ -24,16 +24,16 @@ func ReadAndCreate(CONFIGFILEPATH string) (map[string]*porthndlr.Handler, error)
 		}
 		c, ok := p.(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf("error during reading listenning ports")
+			return nil, "", fmt.Errorf("error during reading listenning ports")
 		}
 		nameparts := strings.Split(name, " ")
-		hndlr, err := porthndlr.NewHandler(nameparts[0], nameparts[1], db, c, logDir+"/andproxy")
+		hndlr, err := porthndlr.NewHandler(nameparts[0], nameparts[1], db, c, fmt.Sprintf("%s/andproxy", logDir))
 		if err != nil {
-			return nil, err
+			return nil, "", err
 		}
 		hdnlrs[name] = hndlr
 	}
-	return hdnlrs, nil
+	return hdnlrs, logDir, nil
 }
 
 func Read(CONFIGFILEPATH string) (map[string]*porthndlr.Config, error) {
@@ -54,7 +54,7 @@ func Read(CONFIGFILEPATH string) (map[string]*porthndlr.Config, error) {
 			return nil, fmt.Errorf("error during reading listenning ports")
 		}
 		nameparts := strings.Split(name, " ")
-		conf, err := porthndlr.NewConfig(c, db, nameparts[1], logDir+"/andproxy")
+		conf, err := porthndlr.NewConfig(c, db, nameparts[1], fmt.Sprintf("%s/andproxy", logDir))
 		if err != nil {
 			return nil, err
 		}

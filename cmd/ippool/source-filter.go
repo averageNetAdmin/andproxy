@@ -4,6 +4,7 @@ package ippool
 //	the struct that Contains array of filgerElements
 //
 type Filter struct {
+	Name    string
 	filters []filterElement
 }
 

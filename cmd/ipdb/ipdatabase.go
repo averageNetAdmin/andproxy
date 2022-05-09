@@ -34,12 +34,6 @@ func (db *IPDB) Init() {
 	db.filters = make(map[string]*ippool.Filter)
 }
 
-func (db *IPDB) Print() {
-	fmt.Println(db.pools)
-	fmt.Println(db.serverPools)
-	fmt.Println(db.filters)
-}
-
 //
 //	add pool to db
 //
@@ -55,6 +49,7 @@ func (db *IPDB) AddPool(name string, addresses []interface{}) error {
 	if err != nil {
 		return err
 	}
+	p.Name = name
 	db.pools[name] = p
 	return nil
 }
@@ -67,6 +62,7 @@ func (db *IPDB) AddServerPool(name string, addresses map[string]interface{}) err
 	if err != nil {
 		return err
 	}
+	p.Name = name
 	db.serverPools[name] = p
 	return nil
 }
@@ -115,6 +111,7 @@ func (db *IPDB) AddFilter(name string, elements map[string]interface{}) error {
 		}
 		result.Add(resPool, resServerPool)
 	}
+	result.Name = name
 	db.filters[name] = result
 	return nil
 }
