@@ -1,7 +1,7 @@
 package ippool
 
 //
-//	the struct that Contains array of filgerElements
+//	contains ip filters
 //
 type Filter struct {
 	Name    string
@@ -9,7 +9,7 @@ type Filter struct {
 }
 
 //
-//	the struct that compare cliets addresses and servers to which should be forwarded requests
+//	compare requsts ip and server pool that should process this request
 //
 type filterElement struct {
 	Pool    Pool
@@ -27,16 +27,25 @@ func (elem *filterElement) Contains(ip string) (bool, error) {
 	return yes, nil
 }
 
+//
+//	server pool rebalance func shell
+//
 func (elem *filterElement) Rebalance() {
 	elem.Srvpool.Rebalance()
 }
 
+//
+//	server pool rebalance func shell
+//
 func (f *Filter) Rebalance() {
 	for i := 0; i < len(f.filters); i++ {
 		f.filters[i].Srvpool.Rebalance()
 	}
 }
 
+//
+//	server pool set log file func shell
+//
 func (f *Filter) SetLogFile(logDir string) error {
 	for i := 0; i < len(f.filters); i++ {
 		err := f.filters[i].Srvpool.SetLogFile(logDir)
@@ -47,6 +56,9 @@ func (f *Filter) SetLogFile(logDir string) error {
 	return nil
 }
 
+//
+//	server pool set balancing method func shell
+//
 func (f *Filter) SetBalancingMethod(bm string) error {
 	for i := 0; i < len(f.filters); i++ {
 		err := f.filters[i].Srvpool.SetBalancingMethod(bm)
@@ -57,27 +69,30 @@ func (f *Filter) SetBalancingMethod(bm string) error {
 	return nil
 }
 
+//
+//	server pool set balancing method func shell
+//
 func (f *filterElement) SetBalancingMethod(bm string) error {
 	err := f.Srvpool.SetBalancingMethod(bm)
 	return err
 }
 
 //
-//	i don't know that to say
+//	set pool
 //
 func (elem *filterElement) SetPool(p *Pool) {
 	elem.Pool = *p
 }
 
 //
-//	i don't know that to say
+//	set server pool
 //
 func (elem *filterElement) SetServerPool(p *ServerPool) {
 	elem.Srvpool = *p
 }
 
 //
-//	i don't know that to say
+//	set pool and server pool
 //
 func (elem *filterElement) Set(pool *Pool, srvpool *ServerPool) {
 	elem.Pool = *pool
@@ -95,7 +110,7 @@ func newFilterElement(pool *Pool, srvpool *ServerPool) filterElement {
 }
 
 //
-//	i don't know that to say
+//	add pool and server pool
 //
 func (f *Filter) Add(pool *Pool, srvpool *ServerPool) {
 	elem := newFilterElement(pool, srvpool)

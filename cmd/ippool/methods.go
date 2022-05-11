@@ -7,11 +7,17 @@ import (
 	"time"
 )
 
+//
+//	interface for balancing methods
+//
 type BalancingMethod interface {
 	FindServer(ip string, p []Server) (*Server, error)
 	Rebalance([]Server)
 }
 
+//
+//	return new balancing method
+//
 func NewBalancingMethod(name string) (BalancingMethod, error) {
 	switch name {
 	case "roundRobin":
@@ -27,7 +33,7 @@ func NewBalancingMethod(name string) (BalancingMethod, error) {
 	case "auto":
 		return &Auto{}, nil
 	default:
-		return nil, nil
+		return nil, fmt.Errorf("%s balancing method not exist", name)
 	}
 }
 

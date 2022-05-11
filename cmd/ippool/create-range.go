@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+//
+//	create range. for example srv1-3 will converted to [srv1, srv2, srv3]
+//
 func CreateRange(rng string) ([]string, error) {
 
 	reg, err := regexp.Compile(`\d+?-\d+`)

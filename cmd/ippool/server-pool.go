@@ -8,8 +8,7 @@ import (
 )
 
 //
-//	the struct that keep servers addresses
-//	contain only IP addresses
+//	the struct that keep servers
 //
 type ServerPool struct {
 	Name    string
@@ -18,6 +17,10 @@ type ServerPool struct {
 	BM      BalancingMethod
 }
 
+//
+//	if server is broken - it move to array of broken server.
+//	if server returns to work - it move to array of working servers
+//
 func (s *ServerPool) UpdateBroken() {
 	for i := 0; i < len(s.Servers); i++ {
 		if s.Servers[i].Broken {
@@ -34,6 +37,9 @@ func (s *ServerPool) UpdateBroken() {
 	s.BM.Rebalance(s.Servers)
 }
 
+//
+//	set balancing method
+//
 func (s *ServerPool) SetBalancingMethod(name string) error {
 	bm, err := NewBalancingMethod(name)
 	if err != nil {
@@ -43,6 +49,9 @@ func (s *ServerPool) SetBalancingMethod(name string) error {
 	return nil
 }
 
+//
+//	find server in pool. for finding uses currnet balancing method
+//
 func (s *ServerPool) FindServer(ip string) (*Server, error) {
 	srv, err := s.BM.FindServer(ip, s.Servers)
 	if err != nil {
@@ -51,6 +60,9 @@ func (s *ServerPool) FindServer(ip string) (*Server, error) {
 	return srv, nil
 }
 
+//
+//	rebalance servers pool
+//
 func (s *ServerPool) Rebalance() {
 	s.BM.Rebalance(s.Servers)
 }
@@ -66,7 +78,7 @@ func (s *ServerPool) SetLogFile(logDir string) error {
 }
 
 //
-//	add IP address in servers pool
+//	add server in servers pool
 //
 func (p *ServerPool) Add(serverNames string, config map[string]interface{}) error {
 
@@ -142,7 +154,7 @@ func (p *ServerPool) Add(serverNames string, config map[string]interface{}) erro
 }
 
 //
-//	add IP address in servers pool from array
+//	add servers in servers pool from map
 //
 func (p *ServerPool) AddFromMap(m map[string]interface{}) error {
 	for addresses, config := range m {
@@ -185,6 +197,9 @@ func NewServerPool(m map[string]interface{}) (*ServerPool, error) {
 	return p, nil
 }
 
+//
+//	set new config to all servers in pool
+//
 func (p *ServerPool) SetConfig(weight, maxFails, breakTime string) error {
 	for i := 0; i < len(p.Servers); i++ {
 		err := p.Servers[i].SetConfig(weight, maxFails, breakTime)

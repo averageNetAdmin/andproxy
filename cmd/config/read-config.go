@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func ReadAndCreate(CONFIGFILEPATH string) (map[string]*porthndlr.Handler, string, error) {
+func CreageHandlers(CONFIGFILEPATH string) (map[string]*porthndlr.Handler, string, error) {
 
 	a, db, logDir, err := read(CONFIGFILEPATH)
 	if err != nil {
@@ -36,7 +36,7 @@ func ReadAndCreate(CONFIGFILEPATH string) (map[string]*porthndlr.Handler, string
 	return hdnlrs, logDir, nil
 }
 
-func Read(CONFIGFILEPATH string) (map[string]*porthndlr.Config, error) {
+func CreateConfigs(CONFIGFILEPATH string) (map[string]*porthndlr.Config, error) {
 
 	a, db, logDir, err := read(CONFIGFILEPATH)
 	if err != nil {

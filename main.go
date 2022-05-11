@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	handlers, logDir, err := config.ReadAndCreate("/etc/andproxy/config.yml")
+	handlers, logDir, err := config.CreageHandlers("/etc/andproxy/config.yml")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -77,7 +77,7 @@ func main() {
 		}
 		switch string(command[:n]) {
 		case "update configuration":
-			c, err := config.Read("/etc/andproxy/config.yml")
+			c, err := config.CreateConfigs("/etc/andproxy/config.yml")
 			if err != nil {
 				conn.Write([]byte(err.Error()))
 			}

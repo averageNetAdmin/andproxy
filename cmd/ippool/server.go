@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+//
+//	contains server data exchange statistics
+//
 type ServerStats struct {
 	DataSended          uint64
 	DataReceived        uint64
@@ -20,6 +23,9 @@ type ServerStats struct {
 	ConnectionsNumber   uint64
 }
 
+//
+//	reset statistics to zero
+//
 func (s *ServerStats) Reset() {
 	s.DataSended = 0
 	s.DataReceived = 0
@@ -28,6 +34,9 @@ func (s *ServerStats) Reset() {
 	s.ConnectionsNumber = 0
 }
 
+//
+//	representation of the server
+//
 type Server struct {
 	Addr                     string
 	Broken                   bool
@@ -41,6 +50,10 @@ type Server struct {
 	logger                   *log.Logger
 }
 
+//
+//	create and return new server. recive server address or domain name, server weight, maximal fail number,
+//	and break time after maximal allowed fails
+//
 func NewServer(addr string, weight, maxFails, breakTime int) *Server {
 	if weight < 1 {
 		weight = 1
@@ -66,6 +79,9 @@ func NewServer(addr string, weight, maxFails, breakTime int) *Server {
 	}
 }
 
+//
+//	connct to the server, recieve protokol and port, return conncetion (net.Conn) or error
+//
 func (s *Server) Connect(proto, port string) (net.Conn, error) {
 	timerStart := time.Now()
 	conn, err := net.Dial(proto, net.JoinHostPort(s.Addr, port))
@@ -83,6 +99,9 @@ func (s *Server) Connect(proto, port string) (net.Conn, error) {
 	return conn, nil
 }
 
+//
+//	create a data pipe between client and server connections. end when ends connection session
+//
 func (s *Server) ExchangeData(client net.Conn, server net.Conn) {
 	start := time.Now()
 	var dataRecieved int64
@@ -110,6 +129,9 @@ func (s *Server) ExchangeData(client net.Conn, server net.Conn) {
 		client.RemoteAddr().String(), dataRecieved, dataSended, dur.String())
 }
 
+//
+//	close connection
+//
 func (s *Server) Disconnect(conn net.Conn) error {
 	err := conn.Close()
 	if err != nil {
@@ -120,6 +142,9 @@ func (s *Server) Disconnect(conn net.Conn) error {
 	return nil
 }
 
+//
+//	increment server fails quantity. if server fails == max fails, server become broken
+//
 func (s *Server) Fail() {
 	s.Fails++
 	s.logger.Printf("server is failed %d times\n", s.Fails)
@@ -133,6 +158,9 @@ func (s *Server) Fail() {
 	}
 }
 
+//
+//	setting server log file
+//
 func (s *Server) SetLogFile(logDir string) error {
 	s.Priority = 100
 	err := os.MkdirAll(logDir, 0644)
@@ -150,6 +178,9 @@ func (s *Server) SetLogFile(logDir string) error {
 	return nil
 }
 
+//
+//	set new server config
+//
 func (s *Server) SetConfig(weight, maxFails, breakTime string) error {
 
 	if strings.HasPrefix(weight, "!") {
