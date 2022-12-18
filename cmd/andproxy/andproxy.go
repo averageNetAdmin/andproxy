@@ -15,18 +15,22 @@ import (
 )
 
 func main() {
+	// Create handler from file and run it
 	h, err := handler.NewHandler("/etc/andproxy/handlers/http_80")
 	if err != nil {
 		fmt.Println(err)
 	}
-
 	h.Listen()
+	
+	// open socket to excange data
+	// For future realises
 	listen, err := net.Listen("unix", "/run/andproxy.sock")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer listen.Close()
-
+	
+	// handle system signals
 	endconn := make(chan struct{}, 1)
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals)
@@ -61,6 +65,8 @@ func main() {
 		}
 
 	}()
+	
+	// handle socket requests
 	go func() {
 		for {
 			conn, err := listen.Accept()
