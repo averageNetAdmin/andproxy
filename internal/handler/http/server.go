@@ -67,6 +67,9 @@ func (s *Server) SetTimeout(network, host string) (net.Conn, error) {
 	return conn, nil
 }
 
+//	Increment server fail number
+//	If fail number reach MaxFails server sleep time equal BreakTime
+//
 func (s *Server) Fail() {
 	v := atomic.AddUint64(&s.fails, 1)
 	if s.MaxFails%v == 0 {
@@ -77,6 +80,7 @@ func (s *Server) Fail() {
 	}
 }
 
+//	Do request to server and return reaponse
 func (s *Server) Do(port string, request *http.Request) (*http.Response, error) {
 	if atomic.LoadInt64(&s.currentConnectionsNumber) >= s.MaxConnections && s.MaxConnections != 0 {
 		return nil, fmt.Errorf("max parallel connections to server reached")

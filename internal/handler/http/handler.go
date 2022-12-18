@@ -17,6 +17,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+//	Separate to sites - virtula hosts
+//
 type Handler struct {
 	Secure bool
 	Port   string
@@ -24,6 +26,8 @@ type Handler struct {
 	logger *log.Logger
 }
 
+//	Create handler from yaml file
+//
 func NewHandler(configPath, port string, secure bool) (*Handler, error) {
 	configBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
@@ -87,10 +91,15 @@ func NewHandler(configPath, port string, secure bool) (*Handler, error) {
 
 }
 
+//	Run handler job gorutine
+//
 func (s *Handler) Listen() {
 	go s.listen()
 }
 
+//	If conn must be secure - check cert
+//	Get requests and delegate they to handle function
+//
 func (s *Handler) listen() {
 
 	if s.Secure {
@@ -119,8 +128,12 @@ func (s *Handler) listen() {
 	}
 }
 
+//	handler for http.Server
+//
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
+
+	//	Filter requset by site domain name
 	reqSite, _, err := net.SplitHostPort(r.URL.Host)
 	if err == nil {
 		fmt.Println(err)
@@ -131,12 +144,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			s = h.Sites[i]
 		}
 	}
+
+	// Filter request by require path
 	var p *Path
 	for i := 0; i < len(s.Paths); i++ {
 		if s.Paths[i].Path.MatchString(r.URL.Path) {
 			p = s.Paths[i]
 		}
 	}
+
 	atomic.AddUint64(&p.connectionsNumber, 1)
 	fmt.Println(p.OverFlow)
 	if p.MaxConnections != 0 && atomic.LoadInt64(&p.currentconnectionsNumber) >= p.MaxConnections {
@@ -158,7 +174,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	fmt.Println(time.Since(start))
+
+	//	Check is accepted client address
 	if p.Accept != nil && !p.Accept.Contains(r.RemoteAddr) {
 		w.WriteHeader(500)
 		atomic.AddUint64(&p.rejected, 1)
@@ -177,7 +194,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	fmt.Println(time.Since(start))
+
 	var srv *Server
 	var resp *http.Response
 	for i := 0; i < len(srvpool.Servers) && resp == nil; i++ {

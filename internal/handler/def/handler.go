@@ -14,6 +14,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// Contain all info about tcp and udp handlers
+//
 type Handler struct {
 	Protocol                 string
 	Port                     string
@@ -36,6 +38,8 @@ type Handler struct {
 	OverFlow       string
 }
 
+//	Create new handler from yaml file
+//
 func NewHandler(configPath, protocol, port string) (*Handler, error) {
 	configBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
@@ -252,10 +256,14 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 
 }
 
+//	Run handler job gorutine
+//
 func (s *Handler) Listen() {
 	go s.listen()
 }
 
+//	Get requests conn and delegate they to handle function
+//
 func (s *Handler) listen() error {
 	listener, err := net.Listen(s.Protocol, fmt.Sprintf("0.0.0.0:%s", s.Port))
 	if err != nil {
@@ -272,6 +280,8 @@ func (s *Handler) listen() error {
 
 }
 
+//
+//
 func (s *Handler) handle(client net.Conn) {
 	atomic.AddUint64(&s.connectionsNumber, 1)
 	if s.MaxConnections != 0 && atomic.LoadInt64(&s.currentconnectionsNumber) >= s.MaxConnections {
@@ -292,6 +302,8 @@ func (s *Handler) handle(client net.Conn) {
 		}
 	}
 
+	//	Check is accepted client address
+	//
 	if s.Accept != nil && !s.Accept.Contains(client.RemoteAddr().String()) {
 		client.Close()
 		atomic.AddUint64(&s.rejected, 1)
@@ -303,6 +315,8 @@ func (s *Handler) handle(client net.Conn) {
 	}
 	atomic.AddInt64(&s.currentconnectionsNumber, 1)
 
+	//	Check and set deadlines
+	//
 	start := time.Now()
 	if s.DeadLine != 0 {
 		client.SetDeadline(start.Add(s.DeadLine))
@@ -314,6 +328,8 @@ func (s *Handler) handle(client net.Conn) {
 	if s.WriteDeadLine != 0 {
 		client.SetWriteDeadline(start.Add(s.WriteDeadLine))
 	}
+
+	//	Compare client ip and servers
 	srvpool := s.Servers
 	for i := 0; i < len(s.IPFilter); i++ {
 		pool := s.IPFilter[i].Contains(client.RemoteAddr().String())
@@ -322,6 +338,8 @@ func (s *Handler) handle(client net.Conn) {
 			break
 		}
 	}
+
+	//	Find available server and connect to they
 	var err error
 	var srv *Server
 	var server net.Conn

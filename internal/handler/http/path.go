@@ -8,6 +8,8 @@ import (
 	"github.com/averageNetAdmin/andproxy/internal/client"
 )
 
+//	Content info about ever site path
+//
 type Path struct {
 	Path                     *regexp.Regexp
 	Accept                   *client.Sources

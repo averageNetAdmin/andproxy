@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+//	Content info about ever site
+//
 type Site struct {
 	DomainName  *regexp.Regexp
 	Certificate *tls.Certificate

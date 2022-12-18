@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+// find all ranges and replase they to several lines
+// return one string
+//
 func Create(text string) ([]string, error) {
 	regrng, err := regexp.Compile(`\[\d+-\d+?\]`)
 

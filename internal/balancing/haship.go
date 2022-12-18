@@ -12,7 +12,6 @@ type HashIP struct {
 }
 
 func (m *HashIP) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
-
 	if len(p) == 0 {
 		return nil, fmt.Errorf("no server.Servers avaible in pool")
 	}

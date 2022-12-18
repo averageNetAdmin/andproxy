@@ -4,6 +4,8 @@ import (
 	"github.com/averageNetAdmin/andproxy/internal/balancing"
 )
 
+// Operate with servers
+//
 type Pool struct {
 	Servers   []*Server
 	Broken    []*Server
@@ -35,6 +37,8 @@ func NewPool(servers []*Server, balancingMethod string) (*Pool, error) {
 	}, nil
 }
 
+//	Check that servers "broken" and move they from Servers pool to Broken
+//
 func (p *Pool) UpdateBroken() {
 	for i := 0; i < len(p.Servers); i++ {
 		if p.Servers[i].broken {
@@ -55,6 +59,8 @@ func (p *Pool) UpdateBroken() {
 	p.balancing.Rebalance(srvs)
 }
 
+//	Find available server by checked balancing method
+//
 func (s *Pool) FindServer(ip string) (*Server, error) {
 	srvs := make([]balancing.BalanceItem, 0)
 	for i := 0; i < len(s.Servers); i++ {

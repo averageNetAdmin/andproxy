@@ -11,6 +11,8 @@ import (
 	"github.com/averageNetAdmin/andproxy/internal/ranges"
 )
 
+//	Representaion of server - everything that have ip address and can get requests
+//
 type Server struct {
 	Addr           string
 	DeadLine       time.Duration
@@ -28,14 +30,21 @@ type Server struct {
 	currentConnectionsNumber int64
 }
 
+//	Getter to match BalanceItem interface
+//
 func (s *Server) GetWeight() int {
 	return s.Weight
 }
 
+//	Getter to match BalanceItem interface
+//
 func (s *Server) GetConnNumber() uint64 {
 	return s.connectionsNumber
 }
 
+//	Increment server fail number
+//	If fail number reach MaxFails server sleep time equal BreakTime
+//
 func (s *Server) Fail() {
 	v := atomic.AddUint64(&s.fails, 1)
 	if s.MaxFails%v == 0 {
@@ -46,6 +55,9 @@ func (s *Server) Fail() {
 	}
 }
 
+//	Connect to server
+//
+//
 func (s *Server) Connect(proto string, port string) (net.Conn, error) {
 	if atomic.LoadInt64(&s.currentConnectionsNumber) == s.MaxConnections {
 		return nil, fmt.Errorf("max parallel connections to server reached")
@@ -66,6 +78,9 @@ func (s *Server) Connect(proto string, port string) (net.Conn, error) {
 	return conn, nil
 }
 
+//	Make pipe between client connection and server connection
+//	Can have deadlines
+//
 func (s *Server) Exchange(client net.Conn, server net.Conn) {
 	start := time.Now()
 	if s.DeadLine != 0 {
@@ -94,6 +109,8 @@ func (s *Server) Exchange(client net.Conn, server net.Conn) {
 	server.Close()
 }
 
+//
+//
 func NewServer(addr string, deadLine, writeDeadLine, readDeadLine, maxConnectTime, breakTime time.Duration,
 	weight int, maxFails uint64, maxConnections int64, logDir string) (*Server, error) {
 
@@ -130,6 +147,8 @@ func NewServer(addr string, deadLine, writeDeadLine, readDeadLine, maxConnectTim
 	}, nil
 }
 
+//	Create server objects from config map
+//
 func ServersFromMap(config map[string]interface{}, logDir string) ([]*Server, error) {
 	var err error
 	addr, ok := config["addr"].(string)

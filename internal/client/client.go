@@ -8,11 +8,14 @@ import (
 	"github.com/averageNetAdmin/andproxy/internal/ranges"
 )
 
+// Contain pool of addresses and pool of networks
+//
 type Sources struct {
 	Addrs []netip.Addr
 	Nets  []netip.Prefix
 }
 
+//	Check is ip address in struct
 //	Return true if struct contains searchIP ip address else return false
 //	If searchIP is not valid ip address return false
 //
@@ -73,6 +76,8 @@ func (ar *Sources) AddFromArr(arr []string) error {
 	return nil
 }
 
+// Return new Sources from ip range
+//
 func New(ip ...string) (*Sources, error) {
 	p := new(Sources)
 	return p, p.AddFromArr(ip)

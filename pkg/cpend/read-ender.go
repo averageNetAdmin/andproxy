@@ -2,6 +2,9 @@ package cpend
 
 import "io"
 
+//	Accept manually end coping without errors
+//	Implement io.ReadWriter
+//
 type ReadWriteEnder struct {
 	Reader io.Reader
 	Writer io.Writer
@@ -31,6 +34,9 @@ func (re *ReadWriteEnder) End() error {
 	return re.wr.Close()
 }
 
+//	Accept manually end coping without errors
+//	Implement io.Reader
+//
 type ReadEnder struct {
 	Reader io.Reader
 	wr     *io.PipeWriter
