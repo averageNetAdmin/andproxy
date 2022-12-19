@@ -11,6 +11,8 @@ type RoundRobin struct {
 	mu            sync.RWMutex
 }
 
+// reutrn next server
+//
 func (m *RoundRobin) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	if len(p) == 0 {
 		return nil, fmt.Errorf("no servers avaible in pool")
@@ -29,6 +31,8 @@ func (m *RoundRobin) FindServer(sIP string, p []BalanceItem) (BalanceItem, error
 	return srv, nil
 }
 
+// update summary weight
+//
 func (m *RoundRobin) Rebalance(p []BalanceItem) {
 	if len(p) == 0 {
 		return
