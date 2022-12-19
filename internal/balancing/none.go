@@ -4,9 +4,14 @@ import (
 	"fmt"
 )
 
+// no balancing. All requests sends to server with highest priority
+// if server down, requsts sends to next server
+//
 type None struct {
 }
 
+// return first server in pool
+//
 func (m *None) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	if len(p) == 0 {
 		return nil, fmt.Errorf("no server.Servers avaible in pool")
@@ -15,6 +20,8 @@ func (m *None) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	return srv, nil
 }
 
+// sort servers by priority
+//
 func (m *None) Rebalance(p []BalanceItem) {
 	if len(p) == 0 {
 		return
