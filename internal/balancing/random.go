@@ -7,11 +7,16 @@ import (
 	"time"
 )
 
+// requsts sends to random server
+//
 type Random struct {
+	// weight map is requires to balancing with weight 
 	weightMap map[int]int
 	mu        sync.RWMutex
 }
 
+// return random server
+//
 func (m *Random) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	if len(p) == 0 {
 		return nil, fmt.Errorf("no server.Servers avaible in pool")
@@ -25,6 +30,8 @@ func (m *Random) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	return srv, nil
 }
 
+// update weight map
+//
 func (m *Random) Rebalance(p []BalanceItem) {
 	if len(p) == 0 {
 		return
