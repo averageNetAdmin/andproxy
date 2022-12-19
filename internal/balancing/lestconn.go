@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-//
+// connect to server 
 //
 type LeastConnections struct {
 }
 
-//
+// find server with least connections number and return it (with weight)
 //
 func (m *LeastConnections) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	if len(p) == 0 {
