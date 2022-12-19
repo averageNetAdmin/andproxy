@@ -41,18 +41,22 @@ type Handler struct {
 //	Create new handler from yaml file
 //
 func NewHandler(configPath, protocol, port string) (*Handler, error) {
+	// read config file
 	configBytes, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		return nil, err
 	}
-
+	
+	// parse config to map
 	config := make(map[string]interface{}, 0)
 	err = yaml.Unmarshal(configBytes, config)
 	if err != nil {
 		return nil, err
 	}
 
+	// check is log dir checked manually
 	logDir, ok := config["logdir"].(string)
+	// if not create log in defult dir
 	if !ok {
 		logDir = fmt.Sprintf("/var/log/andproxy/%s_%s/", protocol, port)
 	}
@@ -61,12 +65,12 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 		return nil, err
 	}
 
+	// parse accepted clients address if field not empty 
 	accept, err := client.New()
 	if err != nil {
 		return nil, err
 	}
-	acceptArr, ok := config["accept"].([]interface{})
-
+	acceptArr, ok := config["accept"].([]interface{}) 
 	if ok {
 		for _, v := range acceptArr {
 			acc, ok := v.(string)
@@ -86,6 +90,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 		accept = nil
 	}
 
+	// parse denied clients address if field not empty 
 	deny, err := client.New()
 	if err != nil {
 		return nil, err
@@ -108,6 +113,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 		deny = nil
 	}
 
+	// parse servers
 	srvs := make([]*Server, 0)
 	serversArr, ok := config["servers"].([]interface{})
 	if ok {
@@ -124,6 +130,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 		}
 	}
 
+	// parse servers. if field not empty use default 
 	balancingStr, ok := config["balancing"].(string)
 	if ok {
 		balancingStr = ""
@@ -133,6 +140,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 		return nil, err
 	}
 
+	// read deadlines. if empty - no deadline
 	var (
 		dl, rdl, wdl, mconntime time.Duration
 		maxconn                 int64
@@ -168,6 +176,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 			return nil, err
 		}
 	}
+	// parse max time to connect server. if not exist infinity
 	if config["maxconnectionstime"] != nil {
 		mconntimeS, ok := config["maxconnectionstime"].(string)
 		if !ok {
@@ -178,12 +187,14 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 			return nil, err
 		}
 	}
+	// parse max connections number. if not exist infinity
 	if config["maxconnections"] != nil {
 		maxconn, ok = config["maxconnections"].(int64)
 		if !ok {
 			return nil, fmt.Errorf("invalid handler maxconnections %v", config["maxconnections"])
 		}
 	}
+	// parse destination port on servers
 	if config["toport"] != nil {
 		toport, ok = config["toport"].(int)
 		if !ok {
@@ -191,6 +202,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 		}
 	}
 
+	// parse ip filters (clients can be filtered by source address and they requests sends to different servers)
 	filters := make([]*IPFilter, 0)
 	filtersStr, ok := config["ipfilters"].([]map[string]interface{})
 	if ok {
@@ -229,6 +241,7 @@ func NewHandler(configPath, protocol, port string) (*Handler, error) {
 
 	}
 
+	// create logger
 	logFile := fmt.Sprintf("%s/%s_%s.log", logDir, protocol, port)
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -283,6 +296,7 @@ func (s *Handler) listen() error {
 //
 //
 func (s *Handler) handle(client net.Conn) {
+	// if max connections reached client will be wait or request will be rejected (reject default)
 	atomic.AddUint64(&s.connectionsNumber, 1)
 	if s.MaxConnections != 0 && atomic.LoadInt64(&s.currentconnectionsNumber) >= s.MaxConnections {
 		switch s.OverFlow {
