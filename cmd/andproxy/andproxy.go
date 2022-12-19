@@ -86,6 +86,8 @@ func main() {
 			}
 			switch string(command[:n]) {
 			case "get current state":
+				// only send current state handler object
+				// all validation on outside
 				data, err := json.Marshal(h)
 				if err != nil {
 					log.Println(err)
