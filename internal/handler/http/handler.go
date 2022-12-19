@@ -103,6 +103,7 @@ func (s *Handler) Listen() {
 func (s *Handler) listen() {
 
 	if s.Secure {
+		// load cert
 		certs := make([]tls.Certificate, 0)
 		for i := 0; i < len(s.Sites); i++ {
 			certs = append(certs, *s.Sites[i].Certificate)
@@ -111,7 +112,7 @@ func (s *Handler) listen() {
 		TLSConf := &tls.Config{
 			Certificates: certs,
 		}
-
+		// create server with TLS cert
 		server := &http.Server{
 			Addr:      fmt.Sprintf(":%s", s.Port),
 			TLSConfig: TLSConf,
@@ -120,6 +121,7 @@ func (s *Handler) listen() {
 
 		server.ListenAndServeTLS("", "")
 	} else {
+		// create serfver without cert
 		server := &http.Server{
 			Addr:    fmt.Sprintf(":%s", s.Port),
 			Handler: s,
@@ -133,7 +135,7 @@ func (s *Handler) listen() {
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
 
-	//	Filter requset by site domain name
+	// Filter requset by site domain name
 	reqSite, _, err := net.SplitHostPort(r.URL.Host)
 	if err == nil {
 		fmt.Println(err)
@@ -152,7 +154,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			p = s.Paths[i]
 		}
 	}
-
+	
 	atomic.AddUint64(&p.connectionsNumber, 1)
 	fmt.Println(p.OverFlow)
 	if p.MaxConnections != 0 && atomic.LoadInt64(&p.currentconnectionsNumber) >= p.MaxConnections {
@@ -176,6 +178,9 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//	Check is accepted client address
+	// if accept array not empty accepted only addresses contained in this array
+	// if accept array empty but deny array not empty denied addresses contained in this array
+	// else all accepted
 	if p.Accept != nil && !p.Accept.Contains(r.RemoteAddr) {
 		w.WriteHeader(500)
 		atomic.AddUint64(&p.rejected, 1)
@@ -185,7 +190,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		atomic.AddUint64(&p.rejected, 1)
 		return
 	}
+	
 	atomic.AddInt64(&p.currentconnectionsNumber, 1)
+	
+	// filter server pool by client address
 	srvpool := p.Servers
 	for i := 0; i < len(p.IPFilter); i++ {
 		pool := p.IPFilter[i].Contains(r.RemoteAddr)
@@ -195,6 +203,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// find available server and get response from they
 	var srv *Server
 	var resp *http.Response
 	for i := 0; i < len(srvpool.Servers) && resp == nil; i++ {
@@ -231,6 +240,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}*/
+	// copy server reaponse to response that will sended to client
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		fmt.Println(err)
