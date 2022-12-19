@@ -4,16 +4,22 @@ import (
 	"fmt"
 )
 
+// interface to object that can be balanced
+//
 type BalanceItem interface {
 	GetWeight() int
 	GetConnNumber() uint64
 }
 
+// Interface to balancing method
+//
 type Method interface {
 	Rebalance([]BalanceItem)
 	FindServer(string, []BalanceItem) (BalanceItem, error)
 }
 
+// return new balancing method with checked name
+//
 func NewMethod(name string) (Method, error) {
 	switch name {
 	case "roundrobin":
