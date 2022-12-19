@@ -6,6 +6,9 @@ import (
 	"sync"
 )
 
+// Filter requests by client ip address hash
+// Client always go to same server
+//
 type HashIP struct {
 	weightMap map[int]int
 	mu        sync.RWMutex
@@ -23,12 +26,17 @@ func (m *HashIP) FindServer(sIP string, p []BalanceItem) (BalanceItem, error) {
 	return srv, nil
 }
 
+// If count of servers was changed, weight map must be changed
+// 
 func (m *HashIP) Rebalance(p []BalanceItem) {
 	if len(p) == 0 {
 		return
 	}
 	counter := 0
 	m.mu.Lock()
+	// count all servers
+	// create one or more linsk to all servers
+	// quantity of links to one server proportional server weight
 	for i := 0; i < len(p); i++ {
 		for ii := p[i].GetWeight(); ii > 0; ii-- {
 			m.weightMap[counter] = i
