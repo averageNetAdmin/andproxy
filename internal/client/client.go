@@ -20,11 +20,14 @@ type Sources struct {
 //	If searchIP is not valid ip address return false
 //
 func (s *Sources) Contains(searchIP string) bool {
+	// get and parse ip from socket
 	host, _, _ := net.SplitHostPort(searchIP)
 	pHost, err := netip.ParseAddr(host)
 	if err != nil {
 		return false
 	}
+	
+	// try find ip in address pool and nets pool
 	for _, a := range s.Addrs {
 		if a.Compare(pHost) == 0 {
 			return true
@@ -46,6 +49,7 @@ func (s *Sources) Add(addrs string) error {
 		return err
 	}
 	for _, el := range rng {
+		// if string contains "/" it is network else address
 		if strings.Contains(el, "/") {
 			net, err := netip.ParsePrefix(el)
 			if err != nil {
