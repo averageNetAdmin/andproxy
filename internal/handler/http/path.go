@@ -28,6 +28,9 @@ type Path struct {
 	OverFlow                 string
 }
 
+// create new Path from map
+// see info in def handler
+//
 func NewPath(URLPath string, config map[string]interface{}) (*Path, error) {
 
 	path, err := regexp.Compile(URLPath)
