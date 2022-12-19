@@ -19,6 +19,7 @@ func NewSite(domainName string, config map[string]interface{}) (*Site, error) {
 	var (
 		certificate tls.Certificate
 	)
+	// check domain. can be regular expression
 	if domainName == "" || domainName == "*" {
 		domainName = ".*"
 	}
@@ -26,6 +27,8 @@ func NewSite(domainName string, config map[string]interface{}) (*Site, error) {
 	if err != nil {
 		return nil, err
 	}
+	
+	// check cert validity
 	paths := make([]*Path, 0)
 	if config["certificate"] != nil && config["certificateKey"] != nil {
 		certStr, ok := config["certificate"].(string)
