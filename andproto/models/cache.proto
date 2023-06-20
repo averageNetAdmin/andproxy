@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/averageNetAdmin/andproxy/andproto/models;models";
+
+message HttpCashe {
+  int64 path_id = 1;
+  bytes data = 2;
+}

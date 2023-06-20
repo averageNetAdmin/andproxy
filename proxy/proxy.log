@@ -1,0 +1,114 @@
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:36:36+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:38:06+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:38:17+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:38:24+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:38:33+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:38:49+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:39:16+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:39:55+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-06T17:41:42+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-06T17:42:08+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T16:30:48+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T16:32:05+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T16:40:01+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T18:07:10+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T18:08:41+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T18:11:04+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T18:11:50+03:00"}
+{"level":"fatal","msg":"failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T18:13:06+03:00"}
+{"level":"fatal","msg":"grpc.Dial()failed to build resolver: passthrough: received empty target in Build()","time":"2023-06-12T18:14:00+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:16:39+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:17:07+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:33:26+03:00"}
+{"func":"CreateServer","level":"error","msg":"DbMngClient.CreateServer(): rpc error: code = Unknown desc = db.QueryRow(): NOT NULL constraint failed: server.log_id","time":"2023-06-12T18:33:27+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:34:14+03:00"}
+{"func":"CreateHttpPath","level":"error","msg":"DbMngClient.CreateHttpPath(): rpc error: code = Unknown desc = db.QueryRow(): table http_path has no column named name","time":"2023-06-12T18:34:14+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:34:24+03:00"}
+{"func":"CreateHttpPath","level":"error","msg":"DbMngClient.CreateHttpPath(): rpc error: code = Unknown desc = db.QueryRow(): table http_path has no column named name","time":"2023-06-12T18:34:24+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:35:38+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:36:11+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:49:04+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T18:51:08+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:05:50+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:07:45+03:00"}
+{"level":"info","msg":"start listen :0","time":"2023-06-12T19:07:45+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:08:17+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:08:19+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:13:28+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:13:28+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:15:43+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:15:44+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:16:00+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:16:00+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:28:15+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:28:15+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:28:43+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:28:43+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:30:56+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:30:56+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:32:41+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:32:42+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:39:11+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:39:11+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:39:11+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:45:55+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:45:55+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:46:30+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:46:30+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:30+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:31+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:31+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:32+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:35+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:35+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:35+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:37+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:37+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:37+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:37+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:38+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:38+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:38+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:38+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:38+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:39+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:39+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:39+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied","time":"2023-06-12T19:46:56+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:48:27+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:48:27+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-12T19:48:28+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:49:58+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:49:58+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-12T19:49:58+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-12T19:50:00+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-12T19:50:04+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:50:21+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:50:21+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:51:19+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:51:19+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-12T19:54:17+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-12T19:54:17+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-13T13:08:11+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-13T13:08:11+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:27+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:30+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:33+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:36+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:39+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:42+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:45+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:48+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:51+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:09:54+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:10:00+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:10:00+03:00"}
+{"func":"ServerHttp()","level":"error","msg":"access denied, no servers","time":"2023-06-13T13:10:03+03:00"}
+{"level":"info","msg":"start proxy","time":"2023-06-20T08:38:57+03:00"}
+{"level":"info","msg":"start listen :80","time":"2023-06-20T08:39:01+03:00"}

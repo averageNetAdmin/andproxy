@@ -1,0 +1,3 @@
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:38:50+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:39:16+03:00"}
+{"level":"fatal","msg":"grpc: no transport security set (use grpc.WithTransportCredentials(insecure.NewCredentials()) explicitly or set credentials)","time":"2023-06-06T17:39:56+03:00"}

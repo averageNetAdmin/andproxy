@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/averageNetAdmin/andproxy/andproto/models;models";
+
+message L4Handler {
+  int64 id = 1;
+  string name = 2;
+  string protocol = 3;
+  int32 port = 4;
+  int64 deadline = 5;
+  int64 write_deadline = 6;
+  int64 read_deadline = 7;
+  repeated int64 proxy_filters = 8;
+  repeated int64 disabled_proxy_filters = 9;
+  int64 max_connections = 10;
+  Status status = 11;
+  enum Status {
+    Unset = 0;
+    Listen = 1;
+    Stopped = 2;
+  }
+}

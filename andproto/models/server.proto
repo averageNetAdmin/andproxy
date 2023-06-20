@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/averageNetAdmin/andproxy/andproto/models;models";
+
+message Server {
+  int64 id = 1;
+  string address = 2;
+  int32 port = 3;
+  int64 connect_timeout = 4;
+  int32 weight = 5;
+  int64 max_fails = 6;
+  int64 break_time = 7;
+  // google.protobuf.Timestamp update_time =
+}
+
+message ServerPool {
+  int64 id = 1;
+  string name = 2;
+  repeated int64 servers = 3;
+  repeated int64 disabled_servers = 4;
+  string balancing_method = 5;
+}
+
+message ProxyFilter {
+  int64 id = 1;
+  string name = 2;
+  string target_net = 3;
+  repeated int64 deny_acls = 4;
+  repeated int64 accept_acls = 5;
+  int64 server_pool = 6;
+}

@@ -1,0 +1,3 @@
+logPath: "./dbmng.log"
+logLevel: "debug"
+port: 4000

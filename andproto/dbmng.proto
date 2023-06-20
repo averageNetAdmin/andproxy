@@ -1,0 +1,278 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "access_control.proto";
+import "server.proto";
+// import "firewall.proto";
+import "http_handler.proto";
+import "l4_handler.proto";
+
+option go_package = "github.com/averageNetAdmin/andproxy/andproto;andproto";
+
+service Dbmng {
+
+  rpc CreateServer (CreateServerRequest) returns (CreateServerResponse) {};
+  rpc UpdateServer (UpdateServerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteServer (DeleteServerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadServers (ReadServersRequest) returns (ReadServersResponse) {};
+
+  rpc CreateServerPool (CreateServerPoolRequest) returns (CreateServerPoolResponse) {};
+  rpc UpdateServerPool (UpdateServerPoolRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteServerPool (DeleteServerPoolRequest) returns (google.protobuf.Empty) {};
+  rpc ReadServerPools (ReadServerPoolsRequest) returns (ReadServerPoolsResponse) {};
+
+  rpc CreateProxyFilter (CreateProxyFilterRequest) returns (CreateProxyFilterResponse) {};
+  rpc UpdateProxyFilter (UpdateProxyFilterRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteProxyFilter (DeleteProxyFilterRequest) returns (google.protobuf.Empty) {};
+  rpc ReadProxyFilters (ReadProxyFiltersRequest) returns (ReadProxyFiltersResponse) {};
+
+  rpc CreateL4Handler (CreateL4HandlerRequest) returns (CreateL4HandlerResponse) {};
+  rpc UpdateL4Handler (UpdateL4HandlerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteL4Handler (DeleteL4HandlerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadL4Handlers (ReadL4HandlersRequest) returns (ReadL4HandlersResponse) {};
+
+  rpc CreateAcl (CreateAclRequest) returns (CreateAclResponse) {};
+  rpc UpdateAcl (UpdateAclRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteAcl (DeleteAclRequest) returns (google.protobuf.Empty) {};
+  rpc ReadAcls (ReadAclsRequest) returns (ReadAclsResponse) {};
+
+  rpc CreateHttpPath (CreateHttpPathRequest) returns (CreateHttpPathResponse) {};
+  rpc UpdateHttpPath (UpdateHttpPathRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpPath (DeleteHttpPathRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpPaths (ReadHttpPathsRequest) returns (ReadHttpPathsResponse) {};
+
+  rpc CreateHttpHost (CreateHttpHostRequest) returns (CreateHttpHostResponse) {};
+  rpc UpdateHttpHost (UpdateHttpHostRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpHost (DeleteHttpHostRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpHosts (ReadHttpHostsRequest) returns (ReadHttpHostsResponse) {};
+
+  rpc CreateHttpHandler (CreateHttpHandlerRequest) returns (CreateHttpHandlerResponse) {};
+  rpc UpdateHttpHandler (UpdateHttpHandlerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpHandler (DeleteHttpHandlerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpHandlers (ReadHttpHandlersRequest) returns (ReadHttpHandlersResponse) {};
+
+  // rpc StartHandler (StartHandlerRequest) returns (google.protobuf.Empty) {};
+  // rpc StopHandler (StopHandlerRequest) returns (google.protobuf.Empty) {};
+
+}
+
+message CreateServerRequest {
+  Server srv = 1;
+}
+message CreateServerResponse {
+  int64 id = 1;
+}
+
+message UpdateServerRequest {
+  Server srv = 1;
+}
+
+message DeleteServerRequest {
+  int64 id = 1;
+}
+
+message ReadServersRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadServersResponse {
+  repeated Server srv = 1;
+  int64 rows_count = 2;
+}
+
+/////////////////////////////////////////////
+
+message CreateServerPoolRequest {
+  ServerPool pool = 1;
+}
+message CreateServerPoolResponse {
+  int64 id = 1;
+}
+
+message UpdateServerPoolRequest {
+  ServerPool pool = 1;
+}
+
+message DeleteServerPoolRequest {
+  int64 id = 1;
+}
+
+message ReadServerPoolsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadServerPoolsResponse {
+  repeated ServerPool pool = 1;
+  int64 rows_count = 2;
+}
+
+///////////////////////////////////////////////
+
+message CreateProxyFilterRequest {
+  ProxyFilter fltr = 1;
+}
+message CreateProxyFilterResponse {
+  int64 id = 1;
+}
+
+message UpdateProxyFilterRequest {
+  ProxyFilter fltr = 1;
+}
+
+message DeleteProxyFilterRequest {
+  int64 id = 1;
+}
+
+message ReadProxyFiltersRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadProxyFiltersResponse {
+  repeated ProxyFilter fltr = 1;
+  int64 rows_count = 2;
+}
+
+//////////////////////////////////////////////////
+
+message CreateL4HandlerRequest {
+  L4Handler hndlr = 1;
+}
+message CreateL4HandlerResponse {
+  int64 id = 1;
+}
+
+message UpdateL4HandlerRequest {
+  L4Handler hndlr = 1;
+}
+
+message DeleteL4HandlerRequest {
+  int64 id = 1;
+}
+
+message ReadL4HandlersRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadL4HandlersResponse {
+  repeated L4Handler hndlr = 1;
+  int64 rows_count = 2;
+}
+
+///////////////////////////////////////////////
+
+message CreateAclRequest {
+  Acl acl = 1;
+}
+message CreateAclResponse {
+  int64 id = 1;
+}
+
+message UpdateAclRequest {
+  Acl acl = 1;
+}
+
+message DeleteAclRequest {
+  int64 id = 1;
+}
+
+message ReadAclsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadAclsResponse {
+  repeated Acl acl = 1;
+  int64 rows_count = 2;
+}
+
+///////////////////////////////////////////////
+
+message CreateHttpPathRequest {
+  HttpPath path = 1;
+}
+message CreateHttpPathResponse {
+  int64 id = 1;
+}
+
+message UpdateHttpPathRequest {
+  HttpPath path = 1;
+}
+
+message DeleteHttpPathRequest {
+  int64 id = 1;
+}
+
+message ReadHttpPathsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadHttpPathsResponse {
+  repeated HttpPath path = 1;
+  int64 rows_count = 2;
+}
+
+//////////////////////////////////////////////
+
+message CreateHttpHostRequest {
+  HttpHost host = 1;
+}
+message CreateHttpHostResponse {
+  int64 id = 1;
+}
+
+message UpdateHttpHostRequest {
+  HttpHost host = 1;
+}
+
+message DeleteHttpHostRequest {
+  int64 id = 1;
+}
+
+message ReadHttpHostsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadHttpHostsResponse {
+  repeated HttpHost host = 1;
+  int64 rows_count = 2;
+}
+
+/////////////////////////////////////////
+
+message CreateHttpHandlerRequest {
+  HttpHandler hndlr = 1;
+}
+message CreateHttpHandlerResponse {
+  int64 id = 1;
+}
+
+message UpdateHttpHandlerRequest {
+  HttpHandler hndlr = 1;
+}
+
+message DeleteHttpHandlerRequest {
+  int64 id = 1;
+}
+
+message ReadHttpHandlersRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadHttpHandlersResponse {
+  repeated HttpHandler hndlr = 1;
+  int64 rows_count = 2;
+}
+
+
+

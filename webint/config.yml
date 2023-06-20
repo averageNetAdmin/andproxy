@@ -1,0 +1,4 @@
+logPath: "./webind.log"
+logLevel: "debug"
+andProxyUrl: "localhost:4001"
+port: 8080

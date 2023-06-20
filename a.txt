@@ -1,0 +1,30 @@
+rpc CreateHttpHandler (CreateHttpHandlerRequest) returns (CreateHttpHandlerResponse) {};
+  rpc UpdateHttpHandler (UpdateHttpHandlerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpHandler (DeleteHttpHandlerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpHandlers (ReadHttpHandlersRequest) returns (ReadHttpHandlersResponse) {};
+
+message CreateHttpHandlerRequest {
+  HttpHandler srv = 1;
+}
+message CreateHttpHandlerResponse {
+  int64 id = 1;
+}
+
+message UpdateHttpHandlerRequest {
+  HttpHandler srv = 1;
+}
+
+message DeleteHttpHandlerRequest {
+  int64 id = 1;
+}
+
+message ReadHttpHandlersRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message ReadHttpHandlersResponse {
+  repeated HttpHandler srv = 1;
+  int64 rows_count = 2;
+}
+

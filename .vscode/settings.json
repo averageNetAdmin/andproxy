@@ -1,0 +1,8 @@
+{
+    "[proto3]": {
+        "editor.tabSize": 2
+    },
+    "[prototext]": {
+        "editor.tabSize": 2
+    }
+}

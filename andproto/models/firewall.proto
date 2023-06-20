@@ -1,0 +1,130 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/averageNetAdmin/andproxy/andproto/models;models";
+
+message FirewallHandler {
+  int64 id = 1;
+  repeated FirewallStatement statement = 2;
+  Policy policy = 7;
+  enum Policy {
+    Unset = 0;
+    Accept = 1;
+    Drop = 2;
+  }
+}
+
+// message FirewallTable {
+//   int64 id = 1;
+//   FirewallFamily family = 2;
+//   Status status = 3;
+//   enum Status {
+//     Unset = 0;
+//     Enabled = 1;
+//     Disabled = 2;
+//   }
+// }
+
+// message FirewallChain {
+//   int64 id = 1;
+//   FirewallFamily family = 2;
+//   int64 table = 3;
+//   Hook hook = 4;
+//   enum Hook {
+//     Unset = 0;
+//     Prerouting = 1;
+//     Input = 2;
+//     Forward = 3;
+//     Output = 4;
+//     Postrouting = 5;
+//   }
+//   Type type = 5;
+//   enum Type {
+//     Unset = 0;
+//     Filter = 1;
+//     Nat = 2;
+//     Route = 3;
+//   }
+//   int32 priority = 6;
+//   Policy policy = 7;
+//   enum Policy {
+//     Unset = 0;
+//     Accept = 1;
+//     Drop = 2;
+//   }
+// }
+
+// message FirewallRule {
+//   int64 id = 1;
+//   FirewallFamily family = 2;
+ 
+//   int64 table = 3;
+//   int64 chain = 4;
+//   int32 handle = 5;
+//   string comment = 6;
+//   FirewallStatement statement = 7;
+// }
+
+// enum FirewallFamily {
+//   Unset = 0;
+//   Ip = 1;
+//   Ip6 = 2;
+//   Inet = 3;
+//   Arp = 4;
+//   Bridge = 5;
+//   Netdev = 6;
+// }
+
+message FirewallStatement {
+  Operation operation = 1;
+  enum Operation {
+    Unset = 0;
+    Accept = 1;
+    Drop = 2;
+    Queue = 3;
+    Continue = 4;
+    Jump = 5;
+    Goto = 6;
+    Reject = 7;
+    Snat_to = 8;
+    Dnat_to = 9;
+    Masquerade = 10;
+    Redirect_to = 11;
+    Tproxe_to = 12;
+    Dup_to = 13;
+    Fwd_to = 14;
+  }
+  string saddr = 2;
+  string daddr = 3;
+  string sport = 4;
+  string dport = 5;
+  string iifname = 6;
+  string oifname = 7;
+  string operation_arg = 8;
+  Hook hook = 9;
+  enum Hook {
+    Unset = 0;
+    Prerouting = 1;
+    Input = 2;
+    Forward = 3;
+    Output = 4;
+    Postrouting = 5;
+  }
+}
+
+
+// message FirewallRule {
+//   int64 id = 1;
+//   FirewallRuleOperation operation = 2;
+//   FirewallTable table = 3;
+//   FirewallChain chain = 4;
+//   FirewallInterface interface = 5;
+//   FirewallAddressFamily address_family = 6;
+//   int64 destination_port = 7;
+//   int64 source_port = 8;
+//   FirewallProtocol = 9;
+//   FirewallProtocol = 10;
+// }

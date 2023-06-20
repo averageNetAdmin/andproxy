@@ -1,0 +1,4 @@
+logPath: "./proxy.log"
+logLevel: "debug"
+dbMngUrl: "localhost:4000"
+port: 4001

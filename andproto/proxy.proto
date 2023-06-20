@@ -1,0 +1,123 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "access_control.proto";
+import "server.proto";
+// import "firewall.proto";
+import "http_handler.proto";
+import "l4_handler.proto";
+import "dbmng.proto";
+import "stats.proto";
+
+option go_package = "github.com/averageNetAdmin/andproxy/andproto;andproto";
+
+service Proxy {
+
+  rpc CreateServer (CreateServerRequest) returns (CreateServerResponse) {};
+  rpc UpdateServer (UpdateServerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteServer (DeleteServerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadServers (ReadServersRequest) returns (ReadServersResponse) {};
+
+  rpc CreateServerPool (CreateServerPoolRequest) returns (CreateServerPoolResponse) {};
+  rpc UpdateServerPool (UpdateServerPoolRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteServerPool (DeleteServerPoolRequest) returns (google.protobuf.Empty) {};
+  rpc ReadServerPools (ReadServerPoolsRequest) returns (ReadServerPoolsResponse) {};
+
+  rpc CreateProxyFilter (CreateProxyFilterRequest) returns (CreateProxyFilterResponse) {};
+  rpc UpdateProxyFilter (UpdateProxyFilterRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteProxyFilter (DeleteProxyFilterRequest) returns (google.protobuf.Empty) {};
+  rpc ReadProxyFilters (ReadProxyFiltersRequest) returns (ReadProxyFiltersResponse) {};
+
+  rpc CreateL4Handler (CreateL4HandlerRequest) returns (CreateL4HandlerResponse) {};
+  rpc UpdateL4Handler (UpdateL4HandlerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteL4Handler (DeleteL4HandlerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadL4Handlers (ReadL4HandlersRequest) returns (ReadL4HandlersResponse) {};
+
+  rpc CreateAcl (CreateAclRequest) returns (CreateAclResponse) {};
+  rpc UpdateAcl (UpdateAclRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteAcl (DeleteAclRequest) returns (google.protobuf.Empty) {};
+  rpc ReadAcls (ReadAclsRequest) returns (ReadAclsResponse) {};
+
+  rpc CreateHttpPath (CreateHttpPathRequest) returns (CreateHttpPathResponse) {};
+  rpc UpdateHttpPath (UpdateHttpPathRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpPath (DeleteHttpPathRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpPaths (ReadHttpPathsRequest) returns (ReadHttpPathsResponse) {};
+
+  rpc CreateHttpHost (CreateHttpHostRequest) returns (CreateHttpHostResponse) {};
+  rpc UpdateHttpHost (UpdateHttpHostRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpHost (DeleteHttpHostRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpHosts (ReadHttpHostsRequest) returns (ReadHttpHostsResponse) {};
+
+  rpc CreateHttpHandler (CreateHttpHandlerRequest) returns (CreateHttpHandlerResponse) {};
+  rpc UpdateHttpHandler (UpdateHttpHandlerRequest) returns (google.protobuf.Empty) {};
+  rpc DeleteHttpHandler (DeleteHttpHandlerRequest) returns (google.protobuf.Empty) {};
+  rpc ReadHttpHandlers (ReadHttpHandlersRequest) returns (ReadHttpHandlersResponse) {};
+
+  rpc GetServersStats (GetServersStatsRequest) returns (GetServersStatsResponse) {};
+  rpc GetServerStats (GetServerStatsRequest) returns (GetServerStatsResponse) {};
+
+  rpc GetServersConnStats (GetServersConnStatsRequest) returns (GetServersConnStatsResponse) {};
+  rpc GetServerConnStats (GetServerConnStatsRequest) returns (GetServerConnStatsResponse) {};
+
+  rpc GetHandlersStats (GetHandlersStatsRequest) returns (GetHandlersStatsResponse) {};
+  rpc GetHandlerStats (GetHandlerRequest) returns (GetHandlerResponse) {};
+}
+
+message GetServersStatsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message GetServersStatsResponse {
+  repeated ServerStats srv = 1;
+  int64 rows_count = 2;
+}
+
+message GetServerStatsRequest {
+  int64 id = 1;
+}
+message GetServerStatsResponse {
+  ServerStats srv = 1;
+}
+
+//////////
+
+message GetServersConnStatsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message GetServersConnStatsResponse {
+  repeated ServerConnStats srv = 1;
+  int64 rows_count = 2;
+}
+
+message GetServerConnStatsRequest {
+  int64 id = 1;
+}
+message GetServerConnStatsResponse {
+  ServerConnStats srv = 1;
+}
+
+//////////
+
+message GetHandlersStatsRequest {
+  int64 limit = 1;
+  int64 offset = 2;
+  string sort_by = 3;
+}
+message GetHandlersStatsResponse {
+  repeated ServerConnStats srv = 1;
+  int64 rows_count = 2;
+}
+
+message GetHandlerRequest {
+  int64 id = 1;
+}
+message GetHandlerResponse {
+  ServerConnStats srv = 1;
+}
